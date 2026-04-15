@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>All Togetharr - Server Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#e4e2e4",
+                    "on-tertiary": "#faf8f8",
+                    "on-secondary-fixed": "#3e3f44",
+                    "tertiary": "#5f5f5f",
+                    "outline": "#757c81",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#5f5e60",
+                    "secondary": "#5e5f63",
+                    "tertiary-container": "#f5f3f3",
+                    "on-error": "#fff7f6",
+                    "primary-container": "#e4e2e4",
+                    "surface-container-highest": "#dde3e9",
+                    "surface": "#f9f9fb",
+                    "tertiary-dim": "#535353",
+                    "on-error-container": "#752121",
+                    "tertiary-fixed-dim": "#e7e5e4",
+                    "tertiary-fixed": "#f5f3f3",
+                    "surface-dim": "#d3dbe2",
+                    "error-container": "#fe8983",
+                    "inverse-on-surface": "#9c9d9f",
+                    "on-primary-container": "#525154",
+                    "on-tertiary-fixed": "#494a4a",
+                    "surface-container-high": "#e4e9ee",
+                    "primary-fixed-dim": "#d6d3d6",
+                    "on-background": "#2d3338",
+                    "secondary-fixed-dim": "#d5d4d9",
+                    "secondary-container": "#e3e2e7",
+                    "outline-variant": "#acb3b8",
+                    "on-surface": "#2d3338",
+                    "secondary-fixed": "#e3e2e7",
+                    "error-dim": "#4e0309",
+                    "on-secondary": "#faf8fe",
+                    "on-primary-fixed-variant": "#5c5b5d",
+                    "inverse-surface": "#0c0e10",
+                    "surface-bright": "#f9f9fb",
+                    "background": "#f9f9fb",
+                    "on-primary": "#faf7f9",
+                    "inverse-primary": "#ffffff",
+                    "error": "#9f403d",
+                    "primary": "#5f5e60",
+                    "on-surface-variant": "#596065",
+                    "on-tertiary-fixed-variant": "#666666",
+                    "secondary-dim": "#525357",
+                    "on-primary-fixed": "#3f3f41",
+                    "on-tertiary-container": "#5c5c5c",
+                    "surface-container": "#ebeef2",
+                    "surface-variant": "#dde3e9",
+                    "primary-dim": "#535254",
+                    "on-secondary-container": "#515156",
+                    "surface-container-low": "#f2f4f6",
+                    "on-secondary-fixed-variant": "#5b5b60"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-40 bg-[#F9F9FB] dark:bg-[#0C0E10] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-[-0.02em] text-[#1D1D1F] dark:text-[#FFFFFF]">All Togetharr</span>
+</div>
+<nav class="hidden md:flex items-center space-x-8 font-['Inter'] tracking-tight">
+<a class="text-[#1D1D1F] font-semibold transition-colors" href="#">Dashboard</a>
+<a class="text-[#6E6E73] hover:bg-[#F2F4F6] dark:hover:bg-[#1D1D1F] transition-colors px-3 py-1 rounded-md" href="#">Library</a>
+<a class="text-[#6E6E73] hover:bg-[#F2F4F6] dark:hover:bg-[#1D1D1F] transition-colors px-3 py-1 rounded-md" href="#">Activity</a>
+</nav>
+<div class="flex items-center gap-3">
+<div class="relative group">
+<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-outline-variant">
+<span class="material-symbols-outlined text-sm">search</span>
+</div>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm w-48 focus:ring-2 focus:ring-primary-container transition-all" placeholder="Search services..." type="text"/>
+</div>
+<button class="p-2 text-[#5F5E60] dark:text-[#F2F4F6] hover:bg-[#F2F4F6] dark:hover:bg-[#1D1D1F] rounded-full transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-[#1D1D1F] bg-surface-container-highest rounded-full transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<main class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-[#F2F4F6] dark:bg-[#1D1D1F] p-4 space-y-2 pt-20">
+<div class="pb-6 px-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a server administrator with a friendly expression and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwLN9yvBDUcxeCYCbDkKugSGCMMwQJlWy4-2vd_o7JxdhV7YJ5eKBZGjjQdcmcb2yNhtGr5ZXCMHdwV5OHL_my4rB7xBwxueDk7cd_xICQmMZBOg8Scw8jLXzNDOTYyfuNx9kgDRuJKjFrrdTJxDgRE14hdnSPCbDzRxIEHMlQE8iubZCfx6N6Z1XbBDMuK79tn1OxHEXOvx9qxc7Elol4b0HqCShca2mpXD9iWR02Y8BtvX23sTQ1fmoFOEy2vOgKKsC8BjmNJ7Ok"/>
+</div>
+<div>
+<p class="text-sm font-black tracking-tighter uppercase text-[#1D1D1F]">Server Admin</p>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_4px_rgba(228,226,228,0.4)]"></span>
+<span class="text-[10px] font-medium uppercase tracking-widest text-[#6E6E73]">Online</span>
+</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 font-['Inter'] text-sm tracking-wide uppercase font-medium bg-white dark:bg-[#0C0E10] text-[#1D1D1F] rounded-md shadow-sm transition-all duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 font-['Inter'] text-sm tracking-wide uppercase font-medium text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 dark:hover:bg-white/5 rounded-md transition-all duration-300" href="#">
+<span class="material-symbols-outlined">subscriptions</span>
+<span>Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 font-['Inter'] text-sm tracking-wide uppercase font-medium text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 dark:hover:bg-white/5 rounded-md transition-all duration-300" href="#">
+<span class="material-symbols-outlined">download</span>
+<span>Downloads</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 font-['Inter'] text-sm tracking-wide uppercase font-medium text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 dark:hover:bg-white/5 rounded-md transition-all duration-300" href="#">
+<span class="material-symbols-outlined">pulse_alert</span>
+<span>Activity</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 font-['Inter'] text-sm tracking-wide uppercase font-medium text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 dark:hover:bg-white/5 rounded-md transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-outline-variant/10 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-[#6E6E73] hover:text-[#1D1D1F] text-xs font-bold tracking-widest uppercase" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#6E6E73] hover:text-[#1D1D1F] text-xs font-bold tracking-widest uppercase" href="#">
+<span class="material-symbols-outlined text-sm">terminal</span>
+<span>Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<section class="flex-1 lg:ml-64 p-8 bg-surface">
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold tracking-[-0.03em] text-on-surface mb-2">System Overview</h1>
+<p class="text-on-surface-variant font-medium">Manage your media ecosystem and connected nodes.</p>
+</header>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Large Status Card -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-8 transition-all">
+<div class="flex justify-between items-start mb-12">
+<div>
+<h2 class="text-sm font-bold tracking-[0.1em] text-tertiary uppercase mb-1">Server Performance</h2>
+<p class="text-2xl font-bold tracking-tight text-on-surface">Optimal Throughput</p>
+</div>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">4K UHD Active</span>
+<span class="px-3 py-1 bg-primary-fixed rounded-full text-[10px] font-bold uppercase tracking-widest text-on-primary-fixed">Stable</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="space-y-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline">CPU Load</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black tracking-tighter text-on-surface">14%</span>
+<span class="text-xs text-primary font-bold">−2%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[14%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline">Memory</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black tracking-tighter text-on-surface">4.2<span class="text-lg">GB</span></span>
+<span class="text-xs text-primary font-bold">+0.4</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[42%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<p class="text-[10px] font-bold uppercase tracking-widest text-outline">Bandwidth</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-black tracking-tighter text-on-surface">850<span class="text-lg">Mbps</span></span>
+<span class="text-xs text-primary font-bold">Peak</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Small Storage Card -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-8 flex flex-col justify-between">
+<div>
+<h2 class="text-sm font-bold tracking-[0.1em] text-tertiary uppercase mb-4">Storage Array</h2>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">storage</span>
+</div>
+<div>
+<p class="text-lg font-bold text-on-surface">12.4 TB Free</p>
+<p class="text-xs text-on-surface-variant">Across 4 physical disks</p>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-lowest text-on-surface text-xs font-bold uppercase tracking-widest rounded-full hover:bg-white transition-colors">Manage Volumes</button>
+</div>
+<!-- Recent Content Grid -->
+<div class="col-span-12 bg-white/40 backdrop-blur-md rounded-xl p-8">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-sm font-bold tracking-[0.1em] text-tertiary uppercase">Recent Library Additions</h2>
+<button class="text-xs font-bold text-primary hover:underline">View All</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="cinematic movie poster style shot of a futuristic cityscape with neon lights and dark moody atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYCzDVDqi6gjWSzv3h61p4TABHASFRLDaFH2VixDL5IDHhozGo3zSvyr94tLDQNbMFJC6uYPvgg7pIJ0xCzq8Xkn6alqiJF8Af3qFxDXDXwk1hR95GkXG2NBknbuHSSWABbMZWa_Khaw4Agu5lSFZkF4mO-zO9JtepsqnQCivcylUK_s5HKJHA8YP5IOYTy3unB9DO2rk9DJageMstOOq-a3Bw4-voH8EKip68c9nU8e6Bf0_rL0P_HlI_PxHfPNZzKpZwtpjl1In7"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Cyber Nexus</p>
+<p class="text-white/60 text-[10px]">2024 • Sci-Fi</p>
+</div>
+</div>
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="vibrant animated movie still featuring a magical forest with glowing plants and whimsical creatures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz2y9Vpj5lQlrCZLnblOWfSh_xZpsm_1uiGWqvAdNfG_j5E4PojfFj0sw2vySxOV_JAwUOlaHod8hwFAJpaT1DwVtl8kbpJ3WbhyMq_T-AMXqzRroxvfXe67TSmPYYTx_rp2oE--rVYRVm1OPmZX76Pje7zGIE4mxqt0wtzSXyrERSKcHcFYvoxP8HX3D0EheOcvhJBSyWjXB8tE2RbYys86CBEQkPUOux_vzrKUeNnURhJdQCi06oORDZmlsNfbzE0NG6fZ68zJpl"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Lost Realm</p>
+<p class="text-white/60 text-[10px]">2023 • Animation</p>
+</div>
+</div>
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="dramatic black and white film still of a classic detective character in a rainy city street" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Dsre_eAB9flOodSfWn2f4ajZS_lt31MtVNp_PYPAPEkOZ4Dvc23pUePYT5j9lyvOWtyDSBR3Gy8_BZx9FGpCozhAT7aB9MtCtdzjkyXMd0H-GqHCdZZeEMJlEmgjer61GkfHoMfQajrIaw9nrKC5bIM1IFtZwRHJlKiDvs_43i7dd0RFZnpTi8LCsK8dwmlCx2TLA2-NSeMjaPKTZOSQ1zfRkYHUKWxR3lGopfVyIifj4WuDAVfqDAD2HByN3RmbrNGf5EzEa9IZ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Echoes of Noir</p>
+<p class="text-white/60 text-[10px]">2024 • Thriller</p>
+</div>
+</div>
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="epic fantasy landscape with a castle on a cliff overlooking a stormy sea under a purple sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs0s05Gs_yTLGTHxwWcpG3uadAyq4XirDbX3lwPdFCh1wT7iA4hYDhduwmO8jNcyk2VaMm_CWtsMPzjAda9A066I5bE5QOf-jWtw9aiENNfGAxajIpn6uJCLZnvvtTNbgdNN5yT8H_XbUa08VmGAStgRH6eIb67ni6bg8hkP3JoYX_ghKNbHIQWdaTNRX9_0Eyf1SUFHFuiTkLtvXZrWXWE3qhvONbg1SnTw4Z-rBfTclJ_mGzTgkrgVsRdnF74BeRpAssQJUPutch"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Storm King</p>
+<p class="text-white/60 text-[10px]">2024 • Fantasy</p>
+</div>
+</div>
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="minimalist documentary poster showing a single mountain peak against a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjP8JkNMccTmz55lQIBvlM_dlP3rZi9D8BUNX68GMKv1RTJSoAtUnM2cYAxLz1PloHcS5br7N4mKr6B4acfx8kjLdors93oJ6A0dFZHarEZXKyySqMlTU3iHS3xQ5yaqL4DdQ0uOGOD3A21dCNP0L93PjHIvnlgHaiaTnvuJ7Y1P_LBIam-j1FpJ7ZBL85det_YItlOYVGHnXDuLpD_f7qyPjqtwKcCVxEPH2Ox9UrZJ3EzmM5kua2YSzJCwMRMkZUyA3gjwCQyDNc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Solitude</p>
+<p class="text-white/60 text-[10px]">2023 • Docu</p>
+</div>
+</div>
+<div class="aspect-[2/3] rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="energetic concert photo with bright lights and a crowd cheering in silouette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1zGtVmYAepyj7-1LlmuegNelugh5SUA3PjZSNtjgMBBSHIJEczuwbjQh3jQLUeHi9JwugLoN4PVTXoW6TUawGF4__54ObBKlUtYNYdkxigIygXPDXRwI2brHZ2GHcyuX9x6dE8t5TWo_KhY0VYmSWxmpAITGt_D2hFtthBIi3rlgijVXQvQrgcdIYYxK-TpK0a2UBl4Vcu0nYm3Lw5stvSaRJmdzDkhTl6OuLqm_keZPg5Y-1XfFc99Ql_pvE4u9YRYehXh9jCmua"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+<p class="text-white text-xs font-bold">Pulse Live</p>
+<p class="text-white/60 text-[10px]">2024 • Music</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Persistent Settings Sidebar Overlay) -->
+<!-- Applying style_bg_color, style_shadows_and_elevation, style_interactions, style_shell_layout -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 transition-opacity">
+<aside class="fixed right-0 h-full w-96 shadow-2xl shadow-[#2D3338]/10 bg-white/80 dark:bg-[#0C0E10]/80 backdrop-blur-xl flex flex-col p-8 slide-in-right transform translate-x-0 transition-transform duration-500">
+<!-- Header Section -->
+<div class="mb-10 flex justify-between items-start">
+<div>
+<h2 class="text-[#1D1D1F] font-bold text-2xl tracking-tight">Server Settings</h2>
+<p class="text-[#6E6E73] text-sm font-medium mt-1">Advanced Configuration</p>
+</div>
+<button class="p-2 hover:bg-surface-container rounded-full transition-all">
+<span class="material-symbols-outlined text-on-surface">close</span>
+</button>
+</div>
+<!-- Tab Navigation -->
+<nav class="flex border-b border-outline-variant/10 mb-8 overflow-x-auto no-scrollbar">
+<button class="px-4 py-2 border-b-2 border-[#5F5E60] text-[#1D1D1F] font-['Inter'] text-body-md whitespace-nowrap">Services</button>
+<button class="px-4 py-2 text-[#6E6E73] hover:text-[#1D1D1F] transition-colors font-['Inter'] text-body-md whitespace-nowrap">Network</button>
+<button class="px-4 py-2 text-[#6E6E73] hover:text-[#1D1D1F] transition-colors font-['Inter'] text-body-md whitespace-nowrap">Users</button>
+<button class="px-4 py-2 text-[#6E6E73] hover:text-[#1D1D1F] transition-colors font-['Inter'] text-body-md whitespace-nowrap">Storage</button>
+</nav>
+<!-- Active Services List (Toggle Group) -->
+<div class="flex-1 overflow-y-auto no-scrollbar">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-outline">Active Modules</h3>
+<span class="text-[10px] font-bold text-primary bg-primary-container px-2 py-0.5 rounded-full">5 Running</span>
+</div>
+<div class="space-y-3">
+<!-- Service Item -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-all rounded-xl border border-transparent hover:border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dns</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Plex Media Server</p>
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-wider">Internal Node • Port 32400</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-outline-variant/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Service Item -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-all rounded-xl border border-transparent hover:border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lan</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Transmission VPN</p>
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-wider">Gateway • Active</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-outline-variant/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Service Item -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-all rounded-xl border border-transparent hover:border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Overseerr</p>
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-wider">Request Mgr • Idle</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-outline-variant/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Add Service Trigger -->
+<div class="pt-6">
+<button class="w-full group flex flex-col items-center justify-center p-8 border-2 border-dashed border-outline-variant/20 hover:border-primary/40 rounded-2xl transition-all hover:bg-white/50">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:scale-110 transition-transform mb-3">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+<span class="text-sm font-bold text-on-surface tracking-tight">Add Service</span>
+<span class="text-[10px] text-on-surface-variant mt-1">Connect new docker or API node</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Action -->
+<div class="pt-8 border-t border-outline-variant/10">
+<button class="w-full py-4 bg-primary text-on-primary font-bold rounded-xl active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+                    Apply Configuration
+                </button>
+<p class="text-center text-[10px] text-outline mt-4 font-medium uppercase tracking-[0.1em]">All Togetharr v2.4.1 (Stable Build)</p>
+</div>
+</aside>
+</div>
+</body></html>

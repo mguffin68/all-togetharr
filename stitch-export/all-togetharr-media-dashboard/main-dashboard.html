@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#e4e2e4",
+                    "on-tertiary": "#faf8f8",
+                    "on-secondary-fixed": "#3e3f44",
+                    "tertiary": "#5f5f5f",
+                    "outline": "#757c81",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#5f5e60",
+                    "secondary": "#5e5f63",
+                    "tertiary-container": "#f5f3f3",
+                    "on-error": "#fff7f6",
+                    "primary-container": "#e4e2e4",
+                    "surface-container-highest": "#dde3e9",
+                    "surface": "#f9f9fb",
+                    "tertiary-dim": "#535353",
+                    "on-error-container": "#752121",
+                    "tertiary-fixed-dim": "#e7e5e4",
+                    "tertiary-fixed": "#f5f3f3",
+                    "surface-dim": "#d3dbe2",
+                    "error-container": "#fe8983",
+                    "inverse-on-surface": "#9c9d9f",
+                    "on-primary-container": "#525154",
+                    "on-tertiary-fixed": "#494a4a",
+                    "surface-container-high": "#e4e9ee",
+                    "primary-fixed-dim": "#d6d3d6",
+                    "on-background": "#2d3338",
+                    "secondary-fixed-dim": "#d5d4d9",
+                    "secondary-container": "#e3e2e7",
+                    "outline-variant": "#acb3b8",
+                    "on-surface": "#2d3338",
+                    "secondary-fixed": "#e3e2e7",
+                    "error-dim": "#4e0309",
+                    "on-secondary": "#faf8fe",
+                    "on-primary-fixed-variant": "#5c5b5d",
+                    "inverse-surface": "#0c0e10",
+                    "surface-bright": "#f9f9fb",
+                    "background": "#f9f9fb",
+                    "on-primary": "#faf7f9",
+                    "inverse-primary": "#ffffff",
+                    "error": "#9f403d",
+                    "primary": "#5f5e60",
+                    "on-surface-variant": "#596065",
+                    "on-tertiary-fixed-variant": "#666666",
+                    "secondary-dim": "#525357",
+                    "on-primary-fixed": "#3f3f41",
+                    "on-tertiary-container": "#5c5c5c",
+                    "surface-container": "#ebeef2",
+                    "surface-variant": "#dde3e9",
+                    "primary-dim": "#535254",
+                    "on-secondary-container": "#515156",
+                    "surface-container-low": "#f2f4f6",
+                    "on-secondary-fixed-variant": "#5b5b60"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.1); }
+        }
+        .status-pulse {
+            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e4e9ee; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- Top Navigation Bar -->
+<header class="w-full sticky top-0 z-40 bg-[#F9F9FB] dark:bg-[#0C0E10] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center space-x-8">
+<span class="text-xl font-bold tracking-[-0.02em] text-[#1D1D1F] dark:text-[#FFFFFF]">All Togetharr</span>
+<nav class="hidden md:flex space-x-6">
+<a class="text-[#1D1D1F] font-semibold font-['Inter'] tracking-tight" href="#">Dashboard</a>
+<a class="text-[#6E6E73] font-['Inter'] tracking-tight hover:bg-[#F2F4F6] transition-colors rounded-lg px-3 py-1" href="#">Library</a>
+<a class="text-[#6E6E73] font-['Inter'] tracking-tight hover:bg-[#F2F4F6] transition-colors rounded-lg px-3 py-1" href="#">Activity</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm w-64 focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Search media..." type="text"/>
+</div>
+<button class="material-symbols-outlined p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors">settings</button>
+</div>
+</header>
+<div class="flex h-[calc(100vh-72px)] overflow-hidden">
+<!-- Left Rail: Sidebar & Health Indicators -->
+<aside class="h-screen w-64 fixed left-0 top-[72px] bg-[#F2F4F6] dark:bg-[#1D1D1F] flex flex-col p-4 space-y-6">
+<div class="space-y-1">
+<p class="font-['Inter'] text-sm tracking-wide uppercase font-medium text-[#6E6E73] px-2 mb-4">Core Services</p>
+<div class="flex items-center justify-between p-3 bg-white dark:bg-[#0C0E10] text-[#1D1D1F] rounded-md shadow-sm transition-all duration-300 ease-in-out">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 transition-all rounded-md">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-lg">subscriptions</span>
+<span class="font-medium">Library</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 transition-all rounded-md">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-lg">download</span>
+<span class="font-medium">Downloads</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-white/50 transition-all rounded-md">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-lg">pulse_alert</span>
+<span class="font-medium">Activity</span>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant/10">
+<p class="font-['Inter'] text-xs tracking-widest uppercase font-bold text-[#6E6E73] px-2 mb-4">Service Health</p>
+<div class="space-y-4 px-2">
+<div class="flex items-center justify-between">
+<span class="text-sm text-on-surface-variant">Plex Media</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(228,226,228,0.6)] status-pulse"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-on-surface-variant">Radarr</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(228,226,228,0.6)] status-pulse"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-on-surface-variant">Sonarr</span>
+<div class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(159,64,61,0.4)]"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-on-surface-variant">Transmission</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(228,226,228,0.6)] status-pulse"></div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-4 flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a man in his 30s with a clean haircut and modern glasses against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqorTLmX-wZEX8Ux33i6d1OlmfaeQOAeeYI-JpeXsSku4hXNTtvbu8eI-Oegps5rsr7b4sWq_1WqgP_soRCb1VgWdqStVkPyuVvmdIqwtPsHXtRE_HbyGSnWfmLvbocUPQdnkX5RSSH1kxkfp0yenBVMIkI-oRdrnhCvo61vOI8xWSsIX9QWs0sK2ufu_KrwF1tKQmYx2aM10S7QmmqIoKB_yKFBAg2BEU40_aIx8x4Sv1oSL9X5CDgfRONC798VXb2orjXD8ftOmC"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Server Admin</p>
+<p class="text-[10px] text-primary tracking-wide">ONLINE</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Pane -->
+<main class="ml-64 mr-80 flex-1 overflow-y-auto p-8 space-y-12">
+<!-- Hero Banner -->
+<section class="relative h-64 rounded-xl overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="vibrant cinematic movie scene with dramatic lighting and high contrast showing a futuristic cityscape at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0TwB-GeXZIT3GGV2WhfgqEFNOMVfBKo6l38h8vggJ6o_lDShdzJf02aL4E6Lf3SOGy6ZLIHM2y7toUAPDBBLFH6pPcp-Y7HsJkM1Oz7s8zjWmp0RDEbCA72_aVh58W7skzEdZpKft0y2z9H-U4oqLU4QUJSDqeUBOOsz5coo42mmTxWpOPQeg38Xk_u0WHKhi5pCGfIC4NKyuQ9viI7VzDTQpiPPshOC742mEpJIv4AOjS7PvrNv0nL-5NkRh43r15lPZHdjAibtT"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-6 left-8 space-y-1">
+<span class="bg-primary px-2 py-1 rounded text-[10px] text-on-primary font-bold tracking-widest uppercase">Upcoming Release</span>
+<h1 class="text-3xl font-headline font-bold text-white tracking-tight">The Midnight Protocol</h1>
+<p class="text-white/70 text-sm">Streaming starts in 2 days • Directed by Julian Vane</p>
+</div>
+</section>
+<!-- Recently Added Bento Grid -->
+<section>
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-headline font-bold text-[#1D1D1F] tracking-tight">Recently Added</h2>
+<button class="text-sm text-primary font-medium hover:underline">View all</button>
+</div>
+<div class="grid grid-cols-4 gap-6">
+<!-- Media Card 1 -->
+<div class="col-span-2 row-span-2 space-y-3">
+<div class="relative aspect-video rounded-xl overflow-hidden bg-surface-container-low group">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="close-up of a classic film projector lens in a dark room with dust particles visible in the light beam" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdAyM6ZNbpY72vuOhKfkuDIZNIJKeOxZpyJ9NQ9R9BNQs1O9wNr_geMZo8A8PDb8aLD71mxYYsVQ6n8JALsXrW1r1Y9YmWCTNSJK95pNsa749Qh-_r-0C1bdn-jVGPgoQfjsSjDVsP_qLtVpyZDe6CeO47Wuu9FFgBY18Luy-qX-2Q_DH1a6LL3ZhhNZRGmp_bQNx1yYpk5XiTjhLbxXEaQQxkbSECS7PfzHZ1Lid35kuBHRAbo9RHhdEeoY5gRHDG9xUmgp7eiddR"/>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-5xl">play_circle</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Cinema Classics: The Archive</h3>
+<p class="text-sm text-on-surface-variant">Documentary • 4K HDR</p>
+</div>
+</div>
+<!-- Media Card 2 -->
+<div class="space-y-3">
+<div class="aspect-[2/3] rounded-xl overflow-hidden bg-surface-container-low group">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="vibrant neon lights of a modern cinema entrance at night with moody atmospheric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHD3Kx-u1A6o47zU_jUrRWd6msaK9q6FKtpddZkVdkuqpNSwHpz5H-QSiYpJN-FrPOZwOPZYjN-KGXuItxW3Y3Vc8kXt1obdoAAf2CdNc5ghisFDhk97f3kfCX-uhwFYwSo3SeT3BxxSgqqkFBL3oYJtyCDBM-639Z2DobmUbcQWnYR1LqGTwsnqOsS5H2utJFRm4gVeBSvAXLTZ3M1ouLy1QHFLTZCcQVgdx-15b-4LbWj_PNTZYCL9Z1tShGZdO0YrWwlK_TJDiM"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-on-surface">Neon Pulse</h3>
+<p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wider">Series • S02 E12</p>
+</div>
+</div>
+<!-- Media Card 3 -->
+<div class="space-y-3">
+<div class="aspect-[2/3] rounded-xl overflow-hidden bg-surface-container-low group">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="abstract artistic movie poster with bold shapes and a muted sophisticated color palette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAqJNXRN_ZrPn5WTa_5ZLKWnjcKpJ_lTtVArBBLO1hm6JM0IFMU2pt4kUn9Ti_Bt7CKSryHcVdA2m3ecKQYB3ytWYRkKibsIUDJpdi5oWrkO-NY4i0O7yg3mavxmq-NWbRRg2fFXfZLsVLiNbQUNVbKZNiZZAnWolhRl4lXpK6S9s_MlSrH-Inp0S5lDzG91qTTHuNTIyHtdKpDqBYGxvWu0phiBAQqY43EL5PJSDs6ETIRpZotT78yLpmvuWNUYeqegYyzkKpNmIv"/>
+</div>
+<div>
+<h3 class="text-sm font-bold text-on-surface">Abstract Paths</h3>
+<p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wider">Movie • 1080P</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Upcoming Media -->
+<section>
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-headline font-bold text-[#1D1D1F] tracking-tight">Calendar</h2>
+</div>
+<div class="space-y-4">
+<div class="flex items-center p-4 bg-surface-container-lowest rounded-xl hover:bg-surface-container-low transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container-high flex flex-col items-center justify-center text-on-surface shrink-0">
+<span class="text-xs font-bold uppercase">Oct</span>
+<span class="text-xl font-black">24</span>
+</div>
+<div class="ml-6 flex-1">
+<h4 class="font-bold text-on-surface">Interstellar II: The Return</h4>
+<p class="text-sm text-on-surface-variant">Movie Release • Radarr Tracking</p>
+</div>
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-outline text-lg">notifications_active</span>
+<span class="text-xs font-bold text-primary px-3 py-1 bg-primary-container rounded-full uppercase tracking-tighter">Monitored</span>
+</div>
+</div>
+<div class="flex items-center p-4 bg-surface-container-lowest rounded-xl hover:bg-surface-container-low transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container-high flex flex-col items-center justify-center text-on-surface shrink-0">
+<span class="text-xs font-bold uppercase">Oct</span>
+<span class="text-xl font-black">26</span>
+</div>
+<div class="ml-6 flex-1">
+<h4 class="font-bold text-on-surface">Cyberpunk: Edgerunners S2</h4>
+<p class="text-sm text-on-surface-variant">Series Finale • Sonarr Tracking</p>
+</div>
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-outline text-lg">notifications_active</span>
+<span class="text-xs font-bold text-primary px-3 py-1 bg-primary-container rounded-full uppercase tracking-tighter">Monitored</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Right Pane: System Stats & Requests -->
+<aside class="w-80 fixed right-0 top-[72px] h-[calc(100vh-72px)] bg-white/80 backdrop-blur-xl border-l border-outline-variant/10 p-6 overflow-y-auto space-y-8">
+<!-- System Stats Widget -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-[#1D1D1F] tracking-tight">System Status</h3>
+<span class="material-symbols-outlined text-outline">analytics</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-xl space-y-6">
+<!-- Download Speed -->
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+<span>Down Speed</span>
+<span class="text-primary">12.4 MB/s</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-dim rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Disk Space -->
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+<span>Storage (12TB)</span>
+<span class="text-primary">82% Full</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-error-container rounded-full" style="width: 82%"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-2">
+<div class="p-3 bg-surface rounded-lg">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">CPU</p>
+<p class="text-lg font-black text-on-surface">14%</p>
+</div>
+<div class="p-3 bg-surface rounded-lg">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">RAM</p>
+<p class="text-lg font-black text-on-surface">4.2GB</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Requests (Jellyseerr) -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-[#1D1D1F] tracking-tight">Recent Requests</h3>
+<span class="material-symbols-outlined text-outline">history</span>
+</div>
+<div class="space-y-4">
+<!-- Request Item -->
+<div class="flex items-center space-x-4 p-2 hover:bg-surface-container-low rounded-lg transition-colors group">
+<div class="w-12 h-16 rounded-md overflow-hidden bg-surface-container-low shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="movie poster art showing a silhouette in a foggy environment with blue and orange lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2_AezWLL7abGrQGM1xIJ5FF3_FHtNdLH3Q_b8TFGzO7YHRh_dNQG4kg0yK2n0fHKH-WKA3aLKiuOA7hY7tnRo_m4ItnvgQX-e5gHwY2D2_zIg1nWwh-SCR6nSioF_j-ycP4tv05X1wTx_spK48HRu4UrDi4HwlcG2d9f-N5m3ag-AWbKsZuxR4Xk6GrpUmBoUPXOXLJ5eyq41IJLLadTXM6IzUe1MBdAL-JmDL6J0bL38yt11Z7vfVOIICzNopCyd3Zk3Pl7gj3Or"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">The Last Outpost</p>
+<p class="text-[10px] text-on-surface-variant">Requested by <span class="font-bold">Sara W.</span></p>
+<div class="mt-1 flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed mr-1.5"></span>
+<span class="text-[10px] font-bold text-primary tracking-tighter uppercase">Approved</span>
+</div>
+</div>
+</div>
+<!-- Request Item -->
+<div class="flex items-center space-x-4 p-2 hover:bg-surface-container-low rounded-lg transition-colors group">
+<div class="w-12 h-16 rounded-md overflow-hidden bg-surface-container-low shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="dramatic lighting on a gold trophy with a blurred cinematic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqzkOuJ3Ysid3mrtj-zdXR7SoNbjbwK6roFHs0KCEn3qpO4iLQeEhaGgylvwRyGy4eboVOoXOO5RnGZ86yfyjL0JZ-t26NZhNyKi6uGnpWV0nqDMD3Gb3_H3YUsZbSigtB2WjFuyfJZ8y_WiflXvZg_cZyQY-R7qG-XCFy2FU42-iSCl_dYqtBhmjiUPuGX2iAe28N46aVBHoKuSCPYQVqPGp5nNLtVDZBSQfynHItgKufseHFg7bLo-GZAHH359PcEBopzCjhGyar"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Empire of Gold</p>
+<p class="text-[10px] text-on-surface-variant">Requested by <span class="font-bold">Admin</span></p>
+<div class="mt-1 flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-outline mr-1.5"></span>
+<span class="text-[10px] font-bold text-outline tracking-tighter uppercase">Pending</span>
+</div>
+</div>
+</div>
+<!-- Request Item -->
+<div class="flex items-center space-x-4 p-2 hover:bg-surface-container-low rounded-lg transition-colors group">
+<div class="w-12 h-16 rounded-md overflow-hidden bg-surface-container-low shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="dark forest with glowing ethereal particles and a mysterious mood" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVwsM_UikrCtNh8w5jYNVe4RqYW7_OTGrrijT9I-xtNp0n9mC9NpI-zhv8hX2QOKLeua_sAEuEGqW0SivmuVxa2vjU0R-zPlLcs2ClwHmH55HXQL8k9ARed0VNnciX7WZTYpsRfq8i2fmDGIkumPkdihN_w_sTsdLpci6DUC8WhJasp8Vbxe3IrGaOFnJXvVHQIlVMxqbVmVQ8-v4c5O298ZW0VZwJIC2GGpYGiMcbF-PeCLwnx4oJ1xoj9pZHOeksW-SGipHyAMei"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Woods of Silence</p>
+<p class="text-[10px] text-on-surface-variant">Requested by <span class="font-bold">Mark T.</span></p>
+<div class="mt-1 flex items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed mr-1.5"></span>
+<span class="text-[10px] font-bold text-primary tracking-tighter uppercase">Processing</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-high hover:bg-surface-container-highest transition-colors rounded-xl text-xs font-bold text-on-surface uppercase tracking-widest">
+                    Manage Requests
+                </button>
+</section>
+</aside>
+</div>
+</body></html>
