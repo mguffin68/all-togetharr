@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: "Inter";
+    font-style: 100 900;
+    font-display: swap;
+    src: url("/fonts/Inter-Variable.woff2") format("woff2");
+  }
+
+  :root {
+    --surface: #F9F9FB;
+    --surface-container-low: #F2F4F6;
+    --surface-container-lowest: #FFFFFF;
+    --surface-container: #ECEEF0;
+    --surface-container-high: #E6E8EA;
+    --surface-container-highest: #E2E4E6;
+    --primary: #5F5E60;
+    --secondary: #5E5F63;
+    --tertiary: #5F5F5F;
+    --on-surface: #2D3338;
+    --on-surface-variant: #596065;
+    --on-background: #2D3338;
+    --on-primary: #FFFFFF;
+    --inverse-surface: #0C0E10;
+    --inverse-on-surface: #9C9D9F;
+    --outline: #757C81;
+    --outline-variant: #ACB3B8;
+    --error: #9F403D;
+    --error-container: #FE8983;
+    --primary-container: #E4E2E4;
+    --primary-fixed: #C8CBD8;
+    --primary-dim: #535254;
+    --primary-fixed-dim: #D6D3D6;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #E4E9EE transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #E4E9EE;
+    border-radius: 10px;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  ::selection {
+    background-color: var(--primary-container);
+    color: var(--on-primary);
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(1.1);
+    }
+  }
+
+  .glass {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .glass-dark {
+    background-color: rgba(12, 14, 16, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .ambient-shadow {
+    box-shadow: 0 32px 64px rgba(45, 51, 56, 0.04), 0 8px 24px rgba(45, 51, 56, 0.02);
+  }
+
+  .ghost-input {
+    @apply bg-transparent border-t-0 border-x-0 border-b border-[#ACB3B8]/20 focus:border-[#5F5E60] focus:ring-0 transition-all duration-300;
+  }
+}
