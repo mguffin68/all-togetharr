@@ -8,6 +8,7 @@ const payloadSchema = z.object({
   type: z.string(),
   baseUrl: z.string().url().optional(),
   apiKey: z.string(),
+  enabled: z.boolean().optional(),
   port: z.number().optional(),
   label: z.string().default("Default"),
   categories: z.array(z.string()).optional(),
@@ -40,14 +41,14 @@ export async function POST(request: Request) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid payload", details: validation.error.errors },
+        { error: "Invalid payload", details: validation.error.issues },
         { status: 400 }
       );
     }
 
-    const { name, type, baseUrl, apiKey, port, label, categories, rootPath, protocol } = validation.data;
+    const { name, type, baseUrl, apiKey, enabled, port, label, categories, rootPath, protocol } = validation.data;
 
-    const service = await createService(name, type);
+    const service = await createService(name, type, enabled);
 
     const connection = await prisma.connection.create({
       data: {

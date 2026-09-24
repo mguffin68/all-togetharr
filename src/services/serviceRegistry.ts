@@ -94,7 +94,7 @@ export const SERVICE_OPTIONS = Object.values(SERVICE_CATEGORIES);
 
 export type ServiceCategory = (typeof SERVICE_CATEGORIES)[keyof typeof SERVICE_CATEGORIES];
 export type ServiceOption = (typeof SERVICE_OPTIONS)[number];
-export type ServiceType = (typeof SERVICE_TYPES)[typeof SERVICE_TYPES[keyof typeof SERVICE_TYPES]];
+export type ServiceType = (typeof SERVICE_TYPES)[keyof typeof SERVICE_TYPES];
 
 export const HEALTH_STATUS = {
   ONLINE: "online",

@@ -1,6 +1,6 @@
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useSettingsStore } from "@/stores/useSettingsStore";
+import Icon from "@/components/ui/Icon";
+import { Search } from "lucide-react";
 
 export default function TopNav() {
   return (
@@ -23,20 +23,21 @@ export default function TopNav() {
       </div>
       <div className="flex items-center space-x-4">
         <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant" />
           <input
-            className="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm w-64 focus:ring-1 focus:ring-primary outline-none transition-all"
+            className="bg-surface-container-low border-none rounded-full py-2 pl-9 pr-4 text-sm w-64 focus:ring-1 focus:ring-primary outline-none transition-all"
             placeholder="Search media..."
             type="text"
           />
         </div>
-        <button className="material-symbols-outlined p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors">
-          notifications
+        <button className="p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors">
+          <Icon name="notifications" size={18} />
         </button>
         <button
           onClick={() => useSettingsStore.getState().toggle()}
-          className="material-symbols-outlined p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors"
+          className="p-2 text-[#5F5E60] hover:bg-[#F2F4F6] rounded-full transition-colors"
         >
-          settings
+          <Icon name="settings" size={18} />
         </button>
       </div>
     </header>

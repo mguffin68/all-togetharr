@@ -12,9 +12,9 @@ export interface Service {
 
 interface ServicesState {
   services: Service[];
-  getService: (id: string) => Service | undefined;
-  getServiceByName: (name: string) => Service | undefined;
-  addService: (service: Omit<Service, "id">) => void;
+  getService: (id: string, services: Service[]) => Service | undefined;
+  getServiceByName: (name: string, services: Service[]) => Service | undefined;
+  addService: (service: Omit<Service, "id"> & { id?: string }) => void;
   updateService: (id: string, updates: Partial<Service>) => void;
   toggleService: (id: string) => void;
   removeService: (id: string) => void;
@@ -24,14 +24,18 @@ interface ServicesState {
 export const useServicesStore = create<ServicesState>((set) => ({
   services: [],
 
-  getService: (id) =>
-    useServicesStore.getState().services.find((s) => s.id === id),
+  getService: (id, services) =>
+    services.find((s) => s.id === id),
 
-  getServiceByName: (name) =>
-    useServicesStore.getState().services.find((s) => s.name === name),
+  getServiceByName: (name, services) =>
+    services.find((s) => s.name === name),
 
   addService: (service) => {
-    const newService = { ...service, id: `svc_${Math.random().toString(36).substring(2, 11)}` };
+    const { id, ...rest } = service;
+    const newService: Service = {
+      ...rest,
+      id: id || `svc_${Math.random().toString(36).substring(2, 11)}`,
+    };
     set((state) => ({ services: [...state.services, newService] }));
   },
 

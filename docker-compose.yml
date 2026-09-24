@@ -1,0 +1,15 @@
+services:
+  all-togetharr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: all-togetharr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Absolute in-container path; the volume below persists your data.
+      DATABASE_URL: "file:/data/sqlite.db"
+      HEALTH_CHECK_INTERVAL_MS: "30000"
+    volumes:
+      - ./data:/data

@@ -1,11 +1,13 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["react"],
+  reactStrictMode: true,
+  output: "standalone",
   images: {
-    domains: ["localhost"],
-    remotePatterns: [],
-  },
-  experimental: {
-    serverActions: {},
+    remotePatterns: [
+      { protocol: "https", hostname: "api.dicebear.com" },
+      { protocol: "https", hostname: "image.tmdb.org" },
+      { protocol: "http", hostname: "localhost" },
+    ],
   },
 };
 

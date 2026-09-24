@@ -18,9 +18,7 @@ export async function proxyRequest(
   apiKey: string,
   options: ProxyOptions
 ): Promise<ProxyResult> {
-  const url = `${baseUrl.replace(/\/+$/, "")}/${targetPath
-    .map((p) => p.replace(/^\/+/, ""))
-    .join("/")}`;
+  const url = `${baseUrl.replace(/\/+$/, "")}/${targetPath.replace(/^\/+/, "")}`;
 
   const headers: Record<string, string> = {
     "Accept": "application/json",

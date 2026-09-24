@@ -12,7 +12,7 @@ export async function GET(
     const connection = await prisma.connection.findFirst({
       where: {
         service: { name: service },
-        baseUrl: { not: "", not: null },
+        baseUrl: { not: "" },
       },
       include: {
         service: true,

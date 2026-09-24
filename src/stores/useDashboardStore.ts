@@ -57,6 +57,8 @@ interface DashboardState {
   updateRequestStatus: (id: string, status: RequestItem["status"]) => void;
   removeRequest: (id: string) => void;
   addRequest: (request: RequestItem) => void;
+  /** Pulls live data from connected services via the proxy and populates the store. */
+  loadFromApi: () => Promise<void>;
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
@@ -90,5 +92,40 @@ export const useDashboardStore = create<DashboardState>((set) => ({
 
   addRequest: (request) => {
     set((state) => ({ requests: [...state.requests, request] }));
+  },
+
+  loadFromApi: async () => {
+    const json = async <T>(res: Response): Promise<T | null> =>
+      res.ok ? ((await res.json()) as T) : null;
+
+    const [radarr, sonarr, qbit, seerr] = await Promise.all([
+      fetch("/api/proxy/radarr/api/v1/movie?pageSize=8&sortProp=added&sortDir=desc")
+        .then((r) => json<Record<string, unknown>[]>(r))
+        .catch(() => null),
+      fetch("/api/proxy/sonarr/api/v3/series?pageSize=8&sortProp=added&sortDir=desc")
+        .then((r) => json<Record<string, unknown>[]>(r))
+        .catch(() => null),
+      fetch("/api/proxy/qbittorrent/api/v2/torrents/info?filter=active")
+        .then((r) => json<Record<string, unknown>[]>(r))
+        .catch(() => null),
+      fetch("/api/proxy/jellyseerr/api/v1/request")
+        .then((r) => json<Record<string, unknown>[]>(r))
+        .catch(() => null),
+    ]);
+
+    const { sonarrSeriesToMedia, radarrMovieToMedia, qbittorrentToTransfers, jellyseerrToRequests } =
+      await import("@/lib/mappers");
+
+    const movies = radarrMovieToMedia(radarr ?? []);
+    const series = sonarrSeriesToMedia(sonarr ?? []);
+    const allMedia = [...movies, ...series];
+
+    set({
+      heroMedia: allMedia[0] ?? null,
+      recentlyAdded: allMedia.slice(0, 4),
+      upcomingContent: allMedia.filter((m) => m.airDate).slice(0, 4),
+      transfers: qbittorrentToTransfers(qbit ?? []),
+      requests: jellyseerrToRequests(seerr ?? []),
+    });
   },
 }));

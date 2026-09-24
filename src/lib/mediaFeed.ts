@@ -6,7 +6,7 @@ export async function getMediaFeed(service: string) {
   switch (service) {
     case "sonarr": {
       const health = await prisma.connection.findFirst({
-        where: { service: { name: "Sonarr" }, baseUrl: { not: null } },
+        where: { service: { name: "Sonarr" }, baseUrl: { not: "" } },
         select: { baseUrl: true, apiKey: true },
       });
       if (!health) {
@@ -16,7 +16,7 @@ export async function getMediaFeed(service: string) {
     }
     case "radarr": {
       const health = await prisma.connection.findFirst({
-        where: { service: { name: "Radarr" }, baseUrl: { not: null } },
+        where: { service: { name: "Radarr" }, baseUrl: { not: "" } },
         select: { baseUrl: true, apiKey: true },
       });
       if (!health) {
