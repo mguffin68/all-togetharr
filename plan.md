@@ -24,14 +24,16 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Docs are at `/api/docs`, the spec is at `/api/openapi.json`, and `/docs` and `/redoc` return 404.
 - Test: `uv run pytest tests/test_task01_app_health.py`
 
-### [ ] Task 2: Settings
+### [x] Task 2: Settings
 
-- Files: `backend/src/all_togetharr/platform/settings.py`
+- Files: `backend/src/all_togetharr/platform/settings.py`, `main.py`
 - Acceptance:
   - Pydantic settings read `CONFIG_DIR` (default `/config`), `DATA_DIR` (default `/data`), `DATABASE_URL`, `LOG_LEVEL`, `TZ`.
+  - Fields are `config_dir`, `data_dir`, `database_url`, `log_level` and `tz`. `log_level` defaults to `INFO` and `tz` to `UTC`.
   - `DATABASE_URL` defaults to SQLite at `<CONFIG_DIR>/all-togetharr.db`.
+  - Loading settings creates no files or directories.
   - An invalid `LOG_LEVEL` raises a validation error.
-  - `create_app()` takes an optional settings object. `conftest.py` builds one with `CONFIG_DIR` and `DATA_DIR` under `tmp_path`, so no test writes to `/config`.
+  - `create_app()` takes an optional settings object and stores it on `app.state.settings`. `conftest.py` builds one with `CONFIG_DIR` and `DATA_DIR` under `tmp_path`, so no test writes to `/config`.
 - Test: `uv run pytest tests/test_task02_settings.py`
 
 ### [ ] Task 3: Database engine and sessions
