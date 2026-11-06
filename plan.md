@@ -36,13 +36,15 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - `create_app()` takes an optional settings object and stores it on `app.state.settings`. `conftest.py` builds one with `CONFIG_DIR` and `DATA_DIR` under `tmp_path`, so no test writes to `/config`.
 - Test: `uv run pytest tests/test_task02_settings.py`
 
-### [ ] Task 3: Database engine and sessions
+### [x] Task 3: Database engine and sessions
 
 - Files: `backend/src/all_togetharr/platform/db.py`, `main.py`
 - Acceptance:
-  - SQLite connections use WAL mode and enforce foreign keys.
-  - A FastAPI dependency yields a session and closes it after the request.
-  - `/api/health` returns 503 with `status: "error"` when the database is unreachable.
+  - `create_db_engine(settings)` returns an engine and creates the SQLite file's parent folder if it is missing.
+  - SQLite connections use WAL mode and enforce foreign keys. Those pragmas run only on SQLite, so PostgreSQL still works.
+  - `create_app` stores `app.state.engine` and `app.state.session_factory`, and disposes the engine on shutdown.
+  - The `get_session` dependency yields a session from `app.state.session_factory` and closes it after the request, including when the route raises.
+  - `/api/health` runs `SELECT 1` on `app.state.engine`. It returns 503 with `status: "error"` when the database is unreachable, and the body leaks no connection details.
 - Test: `uv run pytest tests/test_task03_db.py`
 
 ### [ ] Task 4: Alembic baseline
