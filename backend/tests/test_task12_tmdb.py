@@ -1,5 +1,6 @@
 """Task 12: TMDB client. Every request goes to a fake transport, never to real TMDB."""
 
+import ast
 import json
 import logging
 from datetime import date
@@ -10,6 +11,7 @@ import pytest
 from sqlalchemy.orm import sessionmaker
 
 from all_togetharr.catalog.models import TitleType
+from all_togetharr.metadata import tmdb as tmdb_module
 from all_togetharr.metadata.tmdb import (
     EpisodeDetails,
     SearchResult,
@@ -263,6 +265,34 @@ def test_blank_episode_name_does_not_fail_the_series(name):
         details = tmdb.details(1396, TitleType.SERIES)
 
     assert details.seasons[1].episodes[0].name == ""
+
+
+def test_blank_tvdb_id_is_none():
+    payload = fixture("movie_603.json")
+    payload["external_ids"]["tvdb_id"] = ""
+
+    with failing_client(httpx.Response(200, json=payload)) as tmdb:
+        details = tmdb.details(603, TitleType.MOVIE)
+
+    assert details.tvdb_id is None
+
+
+def test_from_none_is_only_used_inside_except_blocks():
+    tree = ast.parse(Path(tmdb_module.__file__).read_text())
+    inside_except = {
+        node
+        for handler in ast.walk(tree)
+        if isinstance(handler, ast.ExceptHandler)
+        for node in ast.walk(handler)
+        if isinstance(node, ast.Raise)
+    }
+    stray = [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Raise) and node.cause is not None and node not in inside_except
+    ]
+
+    assert stray == []
 
 
 def test_rate_limit_raises_a_typed_error_with_retry_after():

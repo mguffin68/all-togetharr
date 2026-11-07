@@ -174,7 +174,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Tests use fixtures and never call the real TMDB. The fixtures are hand-written from the TMDB response shape, because we have no API key to record real responses.
 - Test: `uv run pytest tests/test_task12_tmdb.py`
 
-### [ ] Task 12a: Tidy the TMDB client
+### [x] Task 12a: Tidy the TMDB client
 
 - Files: `backend/src/all_togetharr/metadata/tmdb.py`
 - Acceptance:

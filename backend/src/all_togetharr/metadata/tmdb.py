@@ -96,9 +96,7 @@ def _parse_int(value: object) -> int:
 
 
 def _parse_str(value: object) -> str:
-    if not isinstance(value, str):
-        raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
-    if not value:
+    if not isinstance(value, str) or not value:
         raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
     return value
 
@@ -118,8 +116,7 @@ def _parse_date(raw: object) -> date | None:
         raise TmdbError(TmdbErrorKind.BAD_RESPONSE) from None
 
 
-def _search_result(item: dict, title_type: TitleType) -> SearchResult:
-    tmdb_id = _parse_int(item["id"])
+def _common_fields(item: dict, title_type: TitleType) -> dict:
     name = _parse_str(item["title"] if title_type is TitleType.MOVIE else item["name"])
     date_key = "release_date" if title_type is TitleType.MOVIE else "first_air_date"
     year = _parse_date(item.get(date_key))
@@ -128,11 +125,26 @@ def _search_result(item: dict, title_type: TitleType) -> SearchResult:
     overview = item.get("overview")
     if not isinstance(overview, str):
         overview = ""
-    poster = _parse_optional_str(item.get("poster_path"))
-    return SearchResult(
-        tmdb_id=tmdb_id, type=title_type, name=name, year=year,
-        overview=overview, poster_path=poster,
-    )
+    return {
+        "tmdb_id": _parse_int(item["id"]),
+        "type": title_type,
+        "name": name,
+        "year": year,
+        "overview": overview,
+        "poster_path": _parse_optional_str(item.get("poster_path")),
+    }
+
+
+def _season(season_number: int, body: dict) -> SeasonDetails:
+    episodes_raw = body.get("episodes")
+    if not isinstance(episodes_raw, list):
+        raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
+    episodes = [_episode(ep) for ep in episodes_raw]
+    return SeasonDetails(season_number=season_number, episodes=episodes)
+
+
+def _search_result(item: dict, title_type: TitleType) -> SearchResult:
+    return SearchResult(**_common_fields(item, title_type))
 
 
 def _episode(item: dict) -> EpisodeDetails:
@@ -194,11 +206,11 @@ class TmdbClient:
                 raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
             return body
         if response.status_code >= 500:
-            raise TmdbError(TmdbErrorKind.NETWORK) from None
+            raise TmdbError(TmdbErrorKind.NETWORK)
         if response.status_code == 401:
-            raise TmdbError(TmdbErrorKind.UNAUTHORIZED) from None
+            raise TmdbError(TmdbErrorKind.UNAUTHORIZED)
         if response.status_code == 404:
-            raise TmdbError(TmdbErrorKind.NOT_FOUND) from None
+            raise TmdbError(TmdbErrorKind.NOT_FOUND)
         if response.status_code == 429:
             retry_after_header = response.headers.get("Retry-After")
             retry_after: int | None = None
@@ -207,8 +219,8 @@ class TmdbClient:
                     retry_after = int(retry_after_header)
                 except (ValueError, TypeError):
                     pass
-            raise TmdbError(TmdbErrorKind.RATE_LIMITED, retry_after=retry_after) from None
-        raise TmdbError(TmdbErrorKind.BAD_RESPONSE) from None
+            raise TmdbError(TmdbErrorKind.RATE_LIMITED, retry_after=retry_after)
+        raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
 
     def search(self, query: str, title_type: TitleType) -> list[SearchResult]:
         with _parsing():
@@ -224,50 +236,24 @@ class TmdbClient:
                 f"/{_endpoint_type(title_type)}/{tmdb_id}",
                 append_to_response="external_ids",
             )
-            id_ = _parse_int(body["id"])
-            name = _parse_str(body["title"] if title_type is TitleType.MOVIE else body["name"])
-            date_key = "release_date" if title_type is TitleType.MOVIE else "first_air_date"
-            year = _parse_date(body.get(date_key))
-            if year is not None:
-                year = year.year
-            overview = body.get("overview")
-            if not isinstance(overview, str):
-                overview = ""
-            poster = _parse_optional_str(body.get("poster_path"))
+            fields = _common_fields(body, title_type)
 
             ext_ids = body.get("external_ids")
             if not isinstance(ext_ids, dict):
                 raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
             imdb_id = _parse_optional_str(ext_ids.get("imdb_id"))
             tvdb_raw = ext_ids.get("tvdb_id")
-            tvdb_id = _parse_int(tvdb_raw) if tvdb_raw is not None else None
+            tvdb_id = _parse_int(tvdb_raw) if tvdb_raw not in (None, "") else None
 
-            if title_type is TitleType.MOVIE:
-                return TitleDetails(
-                    tmdb_id=id_, type=title_type, name=name, year=year,
-                    overview=overview, poster_path=poster,
-                    imdb_id=imdb_id, tvdb_id=tvdb_id, seasons=[],
-                )
-
-            seasons_data = body.get("seasons", [])
             seasons: list[SeasonDetails] = []
-            for season in seasons_data:
-                season_number = _parse_int(season["season_number"])
-                season_body = self._get(
-                    f"/{_endpoint_type(title_type)}/{tmdb_id}/season/{season_number}",
-                )
-                episodes_raw = season_body.get("episodes")
-                if not isinstance(episodes_raw, list):
-                    raise TmdbError(TmdbErrorKind.BAD_RESPONSE)
-                episodes = [_episode(ep) for ep in episodes_raw]
-                seasons.append(SeasonDetails(
-                    season_number=season_number, episodes=episodes,
-                ))
-            return TitleDetails(
-                tmdb_id=id_, type=title_type, name=name, year=year,
-                overview=overview, poster_path=poster,
-                imdb_id=imdb_id, tvdb_id=tvdb_id, seasons=seasons,
-            )
+            if title_type is TitleType.SERIES:
+                for season in body.get("seasons", []):
+                    season_number = _parse_int(season["season_number"])
+                    season_body = self._get(
+                        f"/{_endpoint_type(title_type)}/{tmdb_id}/season/{season_number}",
+                    )
+                    seasons.append(_season(season_number, season_body))
+            return TitleDetails(**fields, imdb_id=imdb_id, tvdb_id=tvdb_id, seasons=seasons)
 
 
 def client_from_settings(
@@ -277,5 +263,5 @@ def client_from_settings(
     api_key = store.get("tmdb.api_key")
     language = store.get("tmdb.language") or "en-US"
     if not api_key:
-        raise TmdbError(TmdbErrorKind.NOT_CONFIGURED) from None
+        raise TmdbError(TmdbErrorKind.NOT_CONFIGURED)
     return TmdbClient(api_key, language, transport=transport)
