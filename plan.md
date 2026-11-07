@@ -7,6 +7,7 @@ Source of truth: `all-togetharr.prd`. Stack: Python 3.12, FastAPI, SQLAlchemy 2,
 - Each task is written test-first: tests go in `backend/tests/test_taskNN_*.py` and start red.
 - A task is done when its tests pass, `uv run ruff check .` is clean, and every earlier test still passes.
 - Run everything from `backend/`: `uv run pytest`.
+- OpenCode writes all implementation code, including fixes. If it cannot finish after 2 attempts, stop and ask Mike. Nobody else patches the code to get past that limit.
 - Stage explicit paths only, such as `git add backend plan.md .gitignore`. Never use `git add -A` or `git commit -a`, because the old-app deletions belong to task L1.
 - pytest prints a `StarletteDeprecationWarning` about `httpx` on every run. This is expected, so don't change dependencies to silence it.
 - New code lives in `backend/` and `frontend/`. The old Next.js app stays out of this work: its main files are already gone from disk, and task L1 covers the leftovers.
@@ -100,12 +101,16 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - An unexpected error in the loop is logged and does not stop the runner.
 - Test: `uv run pytest tests/test_task07_job_runner.py`
 
-### [ ] Task 8: Users and password hashing
+### [x] Task 8: Users and password hashing
 
-- Files: `backend/src/all_togetharr/platform/auth/models.py`, `passwords.py`, a new migration
+- Files: `backend/src/all_togetharr/platform/auth/__init__.py`, `platform/auth/models.py`, `platform/auth/passwords.py`, `platform/auth/users.py`, `models.py`, a new migration
 - Acceptance:
-  - `User` has name, role (Admin, Manager, Requester, Viewer) and auth source.
-  - Passwords are hashed with Argon2 and never stored in plain text.
+  - `User` (table `users`) has name, role (Admin, Manager, Requester, Viewer), auth source (local, Jellyfin, OIDC), password hash and created time. Quotas and notification preferences wait for the features that use them.
+  - Names are unique regardless of case, using a `name_key` column.
+  - Passwords are hashed with Argon2id and never stored in plain text. Passwords must be 8 to 1024 characters.
+  - `verify_password` returns `False` on a wrong password or corrupt hash, and `needs_rehash` flags hashes with outdated settings.
+  - `create_user` validates input and adds the user in the caller's transaction.
+  - Only local users have a password hash, and the database enforces that local users must have one.
 - Test: `uv run pytest tests/test_task08_users.py`
 
 ### [ ] Task 9: Login, sessions, role checks

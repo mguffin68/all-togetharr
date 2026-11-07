@@ -5,6 +5,7 @@ description = "One self-hosted app for library, queue and requests."
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.13",
+    "argon2-cffi>=25.1.0",
     "fastapi>=0.115",
     "pydantic-settings>=2.4",
     "sqlalchemy>=2.0",
