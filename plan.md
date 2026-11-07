@@ -139,7 +139,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Backups (later) must include `secret.key`, or saved secrets cannot be restored.
 - Test: `uv run pytest tests/test_task10_settings_store.py`
 
-### [ ] Task 10a: Safe validation errors
+### [x] Task 10a: Safe validation errors
 
 - Files: `backend/src/all_togetharr/main.py`, `platform/auth/routes.py`
 - Acceptance:

@@ -67,16 +67,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ):
-        try:
-            return JSONResponse(
-                status_code=422,
-                content={"detail": exc.errors()},
-            )
-        except UnicodeEncodeError:
-            return JSONResponse(
-                status_code=422,
-                content={"detail": "Invalid input"},
-            )
+        errors = []
+        for err in exc.errors():
+            loc = [
+                item.encode("utf-8", "replace").decode("utf-8")
+                if isinstance(item, str)
+                else item
+                for item in err["loc"]
+            ]
+            msg = err["msg"].encode("utf-8", "replace").decode("utf-8")
+            errors.append({"type": err["type"], "loc": loc, "msg": msg})
+        return JSONResponse(status_code=422, content={"detail": errors})
 
     @app.get("/api/health")
     def health(request: Request):

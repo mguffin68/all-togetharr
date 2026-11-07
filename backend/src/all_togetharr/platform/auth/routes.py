@@ -3,7 +3,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import AfterValidator, BaseModel, StringConstraints
+from pydantic import BaseModel, StringConstraints
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -25,24 +25,14 @@ from all_togetharr.platform.auth.users import (
 from all_togetharr.platform.db import get_session
 
 
-def _accept_utf8(value: str) -> str:
-    try:
-        value.encode("utf-8")
-    except UnicodeEncodeError as exc:
-        raise ValueError("string contains invalid unicode") from exc
-    return value
-
-
 class Credentials(BaseModel):
     name: Annotated[
         str,
         StringConstraints(max_length=MAX_NAME_LENGTH),
-        AfterValidator(_accept_utf8),
     ]
     password: Annotated[
         str,
         StringConstraints(max_length=MAX_PASSWORD_LENGTH),
-        AfterValidator(_accept_utf8),
     ]
 
 
