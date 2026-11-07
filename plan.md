@@ -195,11 +195,11 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - A TMDB failure returns a clear HTTP error with a `code`, and stores nothing.
 - Test: `uv run pytest tests/test_task13_add_title.py`
 
-### [ ] Task 14: Catalog browse API
+### [x] Task 14: Catalog browse API
 
-- Files: `backend/src/all_togetharr/catalog/routes.py`
+- Files: `backend/src/all_togetharr/catalog/routes.py`, `backend/src/all_togetharr/catalog/service.py`
 - Acceptance:
-  - `GET /api/v1/titles` supports paging, type and status filters, sort and text search.
+  - `GET /api/v1/titles` supports paging (`page`, `page_size`), `type` and `status` filters, `sort` and `order`, and text search (`q`). Any logged-in user.
   - `GET /api/v1/titles/{id}` returns the title with seasons and episodes.
   - Listing 10,000 seeded titles returns in under 1 s.
 - Test: `uv run pytest tests/test_task14_browse.py`

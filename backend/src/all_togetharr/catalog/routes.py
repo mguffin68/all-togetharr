@@ -1,14 +1,24 @@
 """Catalog API routes: search TMDB and add titles."""
 
+from collections.abc import Iterator
+from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from all_togetharr.catalog.models import TitleType
-from all_togetharr.catalog.service import TitleExistsError, add_title, library_tmdb_ids
+from all_togetharr.catalog.models import TitleStatus, TitleType
+from all_togetharr.catalog.service import (
+    SortOrder,
+    TitleExistsError,
+    TitleSort,
+    add_title,
+    get_title_with_episodes,
+    library_tmdb_ids,
+    list_titles,
+)
 from all_togetharr.metadata.tmdb import TmdbClient, TmdbError, TmdbErrorKind, client_from_settings
 from all_togetharr.platform.auth.deps import require_role
 from all_togetharr.platform.auth.models import Role
@@ -19,7 +29,7 @@ from all_togetharr.platform.settings_store import SettingsStore
 def get_tmdb_client(
     request: Request,
     db: Annotated[Session, Depends(get_session)],
-) -> TmdbClient:
+) -> Iterator[TmdbClient]:
     store = SettingsStore(db, request.app.state.secret_box)
     with client_from_settings(store) as client:
         yield client
@@ -36,6 +46,8 @@ class SearchItemResponse(BaseModel):
 
 
 class TitleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     type: TitleType
     tmdb_id: int
@@ -45,10 +57,43 @@ class TitleResponse(BaseModel):
     year: int | None
     overview: str | None
     poster_path: str | None
-    status: str
+    status: TitleStatus
     monitored: bool
-    tags: list
-    added_at: str
+    tags: list[str]
+    added_at: datetime
+
+
+class EpisodeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    season_number: int
+    episode_number: int
+    name: str | None
+    absolute_no: int | None
+    air_date: date | None
+    monitored: bool
+    file_id: int | None
+
+
+class SeasonResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    season_number: int
+    monitored: bool
+    episodes: list[EpisodeResponse]
+
+
+class TitleDetailResponse(TitleResponse):
+    seasons: list[SeasonResponse]
+
+
+class TitleListResponse(BaseModel):
+    items: list[TitleResponse]
+    total: int
+    page: int
+    page_size: int
 
 
 class AddTitleBody(BaseModel):
@@ -67,7 +112,7 @@ router = APIRouter(prefix="/api/v1", tags=["catalog"])
 def search_metadata(
     tmdb: Annotated[TmdbClient, Depends(get_tmdb_client)],
     db: Annotated[Session, Depends(get_session)],
-    query: str = Query(min_length=1, max_length=200),
+    query: Annotated[str, Query(min_length=1, max_length=200)],
     type: TitleType | None = None,
 ):
     types_to_search: list[TitleType]
@@ -113,25 +158,51 @@ def add_title_route(
             detail="Title already in library",
         ) from None
     db.commit()
-    return TitleResponse(
-        id=title.id,
-        type=title.type,
-        tmdb_id=title.tmdb_id,
-        tvdb_id=title.tvdb_id,
-        imdb_id=title.imdb_id,
-        name=title.name,
-        year=title.year,
-        overview=title.overview,
-        poster_path=title.poster_path,
-        status=title.status.value,
-        monitored=title.monitored,
-        tags=title.tags,
-        added_at=title.added_at.isoformat(),
+    return TitleResponse.model_validate(title)
+
+
+@router.get(
+    "/titles",
+    response_model=TitleListResponse,
+    dependencies=[Depends(require_role(Role.VIEWER))],
+)
+def list_titles_route(
+    db: Annotated[Session, Depends(get_session)],
+    page: Annotated[int, Query(ge=1, le=1_000_000)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=200)] = 50,
+    type: TitleType | None = None,
+    status_param: Annotated[TitleStatus | None, Query(alias="status")] = None,
+    q: Annotated[str | None, Query(max_length=200)] = None,
+    sort: TitleSort = TitleSort.NAME,
+    order: SortOrder = SortOrder.ASC,
+):
+    titles, total = list_titles(
+        db, page=page, page_size=page_size,
+        title_type=type, status=status_param, q=q,
+        sort=sort, order=order,
+    )
+    return TitleListResponse(
+        items=[TitleResponse.model_validate(t) for t in titles],
+        total=total, page=page, page_size=page_size,
     )
 
 
-def tmdb_error_handler(request: Request, exc: TmdbError) -> JSONResponse:
+@router.get(
+    "/titles/{title_id}",
+    response_model=TitleDetailResponse,
+    dependencies=[Depends(require_role(Role.VIEWER))],
+)
+def get_title_route(
+    title_id: Annotated[int, Path(gt=0, le=2147483647)],
+    db: Annotated[Session, Depends(get_session)],
+):
+    title = get_title_with_episodes(db, title_id)
+    if title is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Title not found")
+    return TitleDetailResponse.model_validate(title)
 
+
+def tmdb_error_handler(request: Request, exc: TmdbError) -> JSONResponse:
     status_map = {
         TmdbErrorKind.NOT_FOUND: status.HTTP_404_NOT_FOUND,
         TmdbErrorKind.NOT_CONFIGURED: status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -140,7 +211,7 @@ def tmdb_error_handler(request: Request, exc: TmdbError) -> JSONResponse:
         TmdbErrorKind.NETWORK: status.HTTP_502_BAD_GATEWAY,
         TmdbErrorKind.BAD_RESPONSE: status.HTTP_502_BAD_GATEWAY,
     }
-    http_status = status_map.get(exc.kind, status.HTTP_502_BAD_GATEWAY)
+    http_status = status_map[exc.kind]
     body = {"detail": str(exc), "code": exc.kind}
     response = JSONResponse(status_code=http_status, content=body)
     if exc.retry_after is not None:

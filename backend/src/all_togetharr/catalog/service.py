@@ -1,11 +1,24 @@
 """Catalog business logic."""
 
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from enum import StrEnum
 
-from all_togetharr.catalog.models import Episode, Season, Title, TitleType
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, selectinload
+
+from all_togetharr.catalog.models import Episode, Season, Title, TitleStatus, TitleType
 from all_togetharr.metadata.tmdb import TmdbClient
+
+
+class TitleSort(StrEnum):
+    NAME = "name"
+    YEAR = "year"
+    ADDED_AT = "added_at"
+
+
+class SortOrder(StrEnum):
+    ASC = "asc"
+    DESC = "desc"
 
 
 class TitleExistsError(Exception):
@@ -66,3 +79,51 @@ def add_title(
         raise
 
     return title
+
+
+def list_titles(
+    session: Session,
+    *,
+    page: int,
+    page_size: int,
+    title_type: TitleType | None = None,
+    status: TitleStatus | None = None,
+    q: str | None = None,
+    sort: TitleSort = TitleSort.NAME,
+    order: SortOrder = SortOrder.ASC,
+) -> tuple[list[Title], int]:
+    filters = []
+    if title_type is not None:
+        filters.append(Title.type == title_type)
+    if status is not None:
+        filters.append(Title.status == status)
+    if q is not None:
+        filters.append(Title.name.icontains(q, autoescape=True))
+
+    count = session.scalar(select(func.count()).select_from(Title).where(*filters))
+
+    column = {
+        TitleSort.NAME: func.lower(Title.name),
+        TitleSort.YEAR: Title.year,
+        TitleSort.ADDED_AT: Title.added_at,
+    }[sort]
+    direction = column.desc() if order == SortOrder.DESC else column.asc()
+
+    stmt = (
+        select(Title)
+        .where(*filters)
+        .order_by(direction.nulls_last(), Title.id)
+        .limit(page_size)
+        .offset((page - 1) * page_size)
+    )
+
+    return list(session.scalars(stmt).all()), count
+
+
+def get_title_with_episodes(session: Session, title_id: int) -> Title | None:
+    stmt = (
+        select(Title)
+        .where(Title.id == title_id)
+        .options(selectinload(Title.seasons).selectinload(Season.episodes))
+    )
+    return session.scalar(stmt)
