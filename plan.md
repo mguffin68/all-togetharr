@@ -127,14 +127,27 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - `/api/health` and `/api/docs` stay public.
 - Test: `uv run pytest tests/test_task09_auth.py`
 
-### [ ] Task 10: Encrypted settings store
+### [x] Task 10: Encrypted settings store
 
-- Files: `backend/src/all_togetharr/platform/secrets.py`, `platform/settings_store.py`, `platform/settings_routes.py`, a new migration
+- Files: `backend/src/all_togetharr/platform/secrets.py`, `platform/settings_store.py`, `platform/settings_routes.py`, `models.py`, `main.py`, a new migration
 - Acceptance:
-  - A key is generated in `CONFIG_DIR` on first run and reused afterwards.
-  - Secret values are encrypted in the database, and the API never returns them in full.
+  - On startup a Fernet key is created at `CONFIG_DIR/secret.key` with owner-only permissions, then reused. Loose permissions are tightened.
+  - A corrupt key stops startup and is never replaced, because a new key would orphan every saved secret.
+  - Settings are a defined list with a type and default. The first two are `tmdb.api_key` (secret) and `tmdb.language` (default `en-US`). Unknown keys are rejected.
+  - Secret values are encrypted in the database. The API shows only `is_set`, never any part of the value.
   - Only Admins can read or change settings under `/api/v1/settings`.
+  - Backups (later) must include `secret.key`, or saved secrets cannot be restored.
 - Test: `uv run pytest tests/test_task10_settings_store.py`
+
+### [ ] Task 10a: Safe validation errors
+
+- Files: `backend/src/all_togetharr/main.py`, `platform/auth/routes.py`
+- Acceptance:
+  - Validation errors return only `type`, `loc` and `msg`. They never echo the rejected input, so passwords are never sent back.
+  - The handler cannot crash on error details that are not JSON-safe.
+  - Invalid Unicode in a request body still returns 422.
+  - The `_accept_utf8` validators are removed if Pydantic already rejects that input.
+- Test: `uv run pytest tests/test_task10a_validation_errors.py`
 
 ### [ ] Task 11: Catalog models
 
