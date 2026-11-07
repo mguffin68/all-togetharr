@@ -214,14 +214,33 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - The shell shows the API version from `/api/health`, or that the API is offline.
 - Test: `cd frontend && pnpm test && pnpm build`. If `pnpm` isn't set up, use `mise exec pnpm@10.34.6 -- pnpm test`.
 
-### [ ] Task 16: Login and library pages
+### [x] Task 16a: First-run setup and sign-in screens
+
+- Files: `frontend/src/` (App, auth screens, a small API helper), tests `frontend/src/auth.test.tsx`, test helper `frontend/src/test/fakeApi.ts`
+- Acceptance:
+  - With no users, the app shows "Create the admin account". It checks the 8-character password minimum before calling the API, shows the server's error message, and moves to sign in after a 409.
+  - Otherwise it checks `/api/v1/auth/me`: a valid session goes straight in, and a 401 shows "Sign in".
+  - A wrong password shows "Invalid name or password". "Sign out" ends the session.
+  - When the server can't be reached, the app says so instead of showing a form.
+  - The app shell (name, theme toggle, API status) stays on every screen.
+- Test: `cd frontend && pnpm test && pnpm build`
+
+### [ ] Task 16b: Library page
+
+- Files: `frontend/src/` (adds `react-router`)
+- Acceptance:
+  - Lists titles from `GET /api/v1/titles`, with type, status and search filters and next/previous paging.
+  - Filters and the page number are in the URL.
+  - Works at phone width (one column, no horizontal scroll).
+- Test: `cd frontend && pnpm test && pnpm build`
+
+### [ ] Task 16c: Title page
 
 - Files: `frontend/src/`
 - Acceptance:
-  - First-run setup and login screens work against the API.
-  - The library page lists titles with filters and paging, and works at phone width.
-  - The title page shows metadata and seasons.
-- Test: `cd frontend && pnpm test`
+  - `/titles/:id` shows the title's metadata, and its seasons with episodes.
+  - Shows a not-found message for an unknown title.
+- Test: `cd frontend && pnpm test && pnpm build`
 
 ### [ ] Task 17: Docker image
 

@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "./App";
+import { fakeApi, json, unauthorized } from "./test/fakeApi";
 import { THEME_STORAGE_KEY } from "./theme";
 
 function stubColorScheme(prefersDark: boolean) {
@@ -19,15 +20,19 @@ function stubColorScheme(prefersDark: boolean) {
 }
 
 function stubHealth(response: Response | Error) {
-  const fetchMock = vi.fn(() =>
-    response instanceof Error ? Promise.reject(response) : Promise.resolve(response),
-  );
-  vi.stubGlobal("fetch", fetchMock);
+  const { fetchMock } = fakeApi({
+    "GET /api/health": () => {
+      if (response instanceof Error) throw response;
+      return response.clone();
+    },
+    "GET /api/v1/auth/setup": () => json({ required: false }),
+    "GET /api/v1/auth/me": unauthorized,
+  });
   return fetchMock;
 }
 
 function healthy() {
-  return new Response(JSON.stringify({ status: "ok", version: "1.2.3" }), { status: 200 });
+  return json({ status: "ok", version: "1.2.3" });
 }
 
 function renderApp() {
