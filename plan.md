@@ -47,13 +47,18 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - `/api/health` runs `SELECT 1` on `app.state.engine`. It returns 503 with `status: "error"` when the database is unreachable, and the body leaks no connection details.
 - Test: `uv run pytest tests/test_task03_db.py`
 
-### [ ] Task 4: Alembic baseline
+### [x] Task 4: Alembic baseline
 
-- Files: `backend/alembic.ini`, `backend/migrations/`, `main.py`
+- Files: `backend/alembic.ini`, `backend/src/all_togetharr/migrations/`, `backend/src/all_togetharr/models.py`, `backend/src/all_togetharr/platform/migrations.py`, `platform/db.py`, `main.py`
 - Acceptance:
-  - Migrations run automatically on startup against the configured database.
-  - Running them twice changes nothing.
+  - Migrations live inside the package so the Docker image ships them.
+  - `platform/db.py` defines `Base` with a naming convention for `ix`, `uq`, `ck`, `fk` and `pk`.
+  - `all_togetharr/models.py` imports every model module, so `Base.metadata` is complete. Later tasks add their models there.
+  - `run_migrations(engine)` upgrades to head on that engine, and `alembic_config()` builds the config without `alembic.ini`.
+  - The app lifespan runs migrations on startup against `app.state.engine`. A failed migration stops startup.
+  - Running migrations twice changes nothing.
   - A test fails if models and migrations drift apart.
+  - `alembic upgrade head` from `backend/` uses the environment settings.
 - Test: `uv run pytest tests/test_task04_migrations.py`
 
 ### [ ] Task 5: Structured logs

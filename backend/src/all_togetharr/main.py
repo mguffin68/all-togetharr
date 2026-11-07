@@ -10,11 +10,13 @@ from sqlalchemy.orm import sessionmaker
 
 from all_togetharr import __version__
 from all_togetharr.platform.db import create_db_engine
+from all_togetharr.platform.migrations import run_migrations
 from all_togetharr.platform.settings import Settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    run_migrations(app.state.engine)
     yield
     engine = app.state.engine
     engine.dispose()
