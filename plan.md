@@ -149,13 +149,18 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - The `_accept_utf8` validators are removed if Pydantic already rejects that input.
 - Test: `uv run pytest tests/test_task10a_validation_errors.py`
 
-### [ ] Task 11: Catalog models
+### [x] Task 11: Catalog models
 
-- Files: `backend/src/all_togetharr/catalog/models.py`, a new migration
+- Files: `backend/src/all_togetharr/catalog/models.py`, `backend/src/all_togetharr/migrations/versions/0006_catalog.py`, `backend/src/all_togetharr/models.py`
 - Acceptance:
   - `Title`, `Season`, `Episode`, `MediaFile` match the PRD core data model.
+  - `Title` also has `name`, `year` and `added_at`, which Tasks 13 and 14 need for display, search and sort.
   - `Title.status` allows only the PRD pipeline values: Requested, Approved, Searching, Downloading, Importing, Available.
-  - `tmdb_id` plus `type` is unique.
+  - `tmdb_id` plus `type` is unique, and `tmdb_id` is required.
+  - `quality_profile_id` and `root_folder_id` are plain nullable integers until their tables exist.
+  - `Episode` points at its season through a composite foreign key on `title_id` and `season_number`.
+  - `MediaFile` has `title_id` so movies can own files, and `link_key` (device:inode) so hardlinks can be recognised.
+  - Deleting a title removes its rows. Deleting a file clears `Episode.file_id` and keeps the episode.
 - Test: `uv run pytest tests/test_task11_catalog_models.py`
 
 ### [ ] Task 12: TMDB client
