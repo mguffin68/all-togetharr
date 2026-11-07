@@ -1,0 +1,31 @@
+{
+  "_id": "abc1",
+  "air_date": "2008-01-20",
+  "episodes": [
+    {
+      "air_date": "2008-01-20",
+      "episode_number": 1,
+      "id": 62085,
+      "name": "Pilot",
+      "overview": "The first episode.",
+      "runtime": 58,
+      "season_number": 1,
+      "still_path": "/still1.jpg"
+    },
+    {
+      "air_date": "2008-01-27",
+      "episode_number": 2,
+      "id": 62086,
+      "name": "Cat's in the Bag...",
+      "overview": "The second episode.",
+      "runtime": 48,
+      "season_number": 1,
+      "still_path": "/still2.jpg"
+    }
+  ],
+  "id": 3572,
+  "name": "Season 1",
+  "overview": "",
+  "poster_path": "/season1.jpg",
+  "season_number": 1
+}

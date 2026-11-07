@@ -163,14 +163,25 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Deleting a title removes its rows. Deleting a file clears `Episode.file_id` and keeps the episode.
 - Test: `uv run pytest tests/test_task11_catalog_models.py`
 
-### [ ] Task 12: TMDB client
+### [x] Task 12: TMDB client
 
-- Files: `backend/src/all_togetharr/metadata/tmdb.py`
+- Files: `backend/src/all_togetharr/metadata/tmdb.py`, `backend/pyproject.toml`, `backend/uv.lock`
 - Acceptance:
   - Search movies and series, and fetch details, including seasons and episodes.
   - The API key comes from the settings store.
-  - Rate-limit and network errors raise one typed error.
-  - Tests use recorded fixtures and never call the real TMDB.
+  - Rate-limit and network errors raise one typed error, `TmdbError`, with a `kind`.
+  - The API key never appears in an error or a log line.
+  - Tests use fixtures and never call the real TMDB. The fixtures are hand-written from the TMDB response shape, because we have no API key to record real responses.
+- Test: `uv run pytest tests/test_task12_tmdb.py`
+
+### [ ] Task 12a: Tidy the TMDB client
+
+- Files: `backend/src/all_togetharr/metadata/tmdb.py`
+- Acceptance:
+  - `from None` appears only inside `except` blocks.
+  - A blank `tvdb_id` gives None, the same as null.
+  - `details` shares its common parsing with `_search_result` and is split into small functions.
+  - No behaviour changes otherwise.
 - Test: `uv run pytest tests/test_task12_tmdb.py`
 
 ### [ ] Task 13: Add a title from TMDB
