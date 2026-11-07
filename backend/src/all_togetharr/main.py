@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from all_togetharr import __version__
+from all_togetharr.platform.auth.routes import router
 from all_togetharr.platform.db import create_db_engine
 from all_togetharr.platform.jobs.runner import JobRunner
 from all_togetharr.platform.logging import RequestLoggingMiddleware, configure_logging
@@ -52,6 +53,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.job_runner = JobRunner(session_factory)
 
     app.add_middleware(RequestLoggingMiddleware)
+
+    app.include_router(router)
+
+    @app.exception_handler(UnicodeEncodeError)
+    async def encode_error_handler(request: Request, exc: UnicodeEncodeError):
+        return JSONResponse(
+            status_code=422,
+            content={"detail": "Invalid input"},
+        )
 
     @app.get("/api/health")
     def health(request: Request):

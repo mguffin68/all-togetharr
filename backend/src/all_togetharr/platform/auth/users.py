@@ -1,10 +1,12 @@
-"""User creation and validation."""
+"""User creation, validation and authentication."""
+
+import functools
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from all_togetharr.platform.auth.models import AuthSource, Role, User
-from all_togetharr.platform.auth.passwords import hash_password
+from all_togetharr.platform.auth.passwords import hash_password, needs_rehash, verify_password
 
 MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 1024
@@ -13,6 +15,30 @@ MAX_NAME_LENGTH = 100
 
 class UserExistsError(ValueError):
     pass
+
+
+@functools.cache
+def _dummy_hash() -> str:
+    return hash_password("this is not a real password used for timing only")
+
+
+def authenticate(session: Session, name: str, password: str) -> User | None:
+    name_key = name.strip().casefold()
+
+    user = session.scalar(select(User).where(User.name_key == name_key))
+
+    if user is None or user.auth_source != AuthSource.LOCAL:
+        verify_password(password, _dummy_hash())
+        return None
+
+    if not verify_password(password, user.password_hash):
+        return None
+
+    if needs_rehash(user.password_hash):
+        user.password_hash = hash_password(password)
+        session.flush()
+
+    return user
 
 
 def create_user(

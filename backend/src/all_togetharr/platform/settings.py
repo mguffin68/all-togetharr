@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     database_url: str = ""
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     tz: str = "UTC"
+    cookie_secure: bool = False
 
     @model_validator(mode="after")
     def _build_database_url(self) -> "Settings":

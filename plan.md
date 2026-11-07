@@ -113,14 +113,18 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Only local users have a password hash, and the database enforces that local users must have one.
 - Test: `uv run pytest tests/test_task08_users.py`
 
-### [ ] Task 9: Login, sessions, role checks
+### [x] Task 9: Login, sessions, role checks
 
-- Files: `backend/src/all_togetharr/platform/auth/routes.py`, `deps.py`
+- Files: `backend/src/all_togetharr/platform/auth/models.py`, `platform/auth/sessions.py`, `platform/auth/users.py`, `platform/auth/deps.py`, `platform/auth/routes.py`, `platform/settings.py`, `main.py`, a new migration
 - Acceptance:
-  - First-run setup creates the first Admin once, then returns 409.
-  - `POST /api/v1/auth/login` sets an HttpOnly session cookie; logout clears it.
-  - A `require_role` dependency returns 401 with no session and 403 with too low a role.
-  - `/api/health` stays public.
+  - First-run setup creates the first Admin once and logs them in, then returns 409.
+  - `POST /api/v1/auth/login` sets an HttpOnly, SameSite=Lax session cookie that lasts 30 days. `COOKIE_SECURE` adds the `Secure` flag.
+  - Sessions are stored in the `sessions` table as a hash of the token. Logout ends the session and clears the cookie.
+  - Wrong passwords and unknown users get the same response, and both cost one hash check.
+  - Login upgrades outdated password hashes.
+  - `get_current_user` returns 401 with no valid session. `require_role(role)` allows that role and above, and returns 403 otherwise.
+  - Role order, lowest first: Viewer, Requester, Manager, Admin.
+  - `/api/health` and `/api/docs` stay public.
 - Test: `uv run pytest tests/test_task09_auth.py`
 
 ### [ ] Task 10: Encrypted settings store
