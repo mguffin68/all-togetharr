@@ -61,13 +61,18 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - `alembic upgrade head` from `backend/` uses the environment settings.
 - Test: `uv run pytest tests/test_task04_migrations.py`
 
-### [ ] Task 5: Structured logs
+### [x] Task 5: Structured logs
 
 - Files: `backend/src/all_togetharr/platform/logging.py`, `main.py`
 - Acceptance:
-  - Logs go to stdout as one JSON object per line with `time`, `level`, `logger`, `message`.
-  - `LOG_LEVEL` filters output.
-  - Each request logs method, path, status and duration.
+  - `configure_logging(settings)` sends logs to stdout as one JSON object per line with `time` (ISO 8601, UTC), `level`, `logger`, `message`, any `extra` fields, and `exception` when there is a traceback.
+  - `LOG_LEVEL` filters output, and calling `configure_logging` twice does not duplicate lines.
+  - The app lifespan configures logging before running migrations.
+  - Uvicorn logs go through the same JSON output, and its access log is off.
+  - `httpx` and `httpcore` log at WARNING or above, because their INFO lines contain full URLs, which can include API keys.
+  - Each request logs `method`, `path`, `status` and `duration_ms` on logger `all_togetharr.request`. Query strings are never logged.
+  - A route that raises logs status 500.
+  - `/api/health` logs at DEBUG, because Docker polls it. Every other request logs at INFO.
 - Test: `uv run pytest tests/test_task05_logging.py`
 
 ### [ ] Task 6: Persistent job table
@@ -178,6 +183,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - One image serves the API and the built SPA on port 8080.
   - It runs as non-root using `PUID`, `PGID` and `UMASK`, with volumes `/config` and `/data`.
   - The container health check calls `/api/health`.
+  - Uvicorn starts with `log_config=None`, so its first lines before app startup are JSON too. Add an integration check: every line of container output parses as JSON.
   - Builds for amd64 and arm64.
 - Test: `docker build -f docker/Dockerfile -t all-togetharr:dev . && docker run --rm -p 8080:8080 all-togetharr:dev`, then `curl localhost:8080/api/health`
 

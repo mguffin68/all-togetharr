@@ -10,12 +10,14 @@ from sqlalchemy.orm import sessionmaker
 
 from all_togetharr import __version__
 from all_togetharr.platform.db import create_db_engine
+from all_togetharr.platform.logging import RequestLoggingMiddleware, configure_logging
 from all_togetharr.platform.migrations import run_migrations
 from all_togetharr.platform.settings import Settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_logging(app.state.settings)
     run_migrations(app.state.engine)
     yield
     engine = app.state.engine
@@ -42,6 +44,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine
     app.state.session_factory = session_factory
+
+    app.add_middleware(RequestLoggingMiddleware)
 
     @app.get("/api/health")
     def health(request: Request):
