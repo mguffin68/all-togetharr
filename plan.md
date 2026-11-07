@@ -184,13 +184,15 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - No behaviour changes otherwise.
 - Test: `uv run pytest tests/test_task12_tmdb.py`
 
-### [ ] Task 13: Add a title from TMDB
+### [x] Task 13: Add a title from TMDB
 
-- Files: `backend/src/all_togetharr/catalog/service.py`, `catalog/routes.py`
+- Files: `backend/src/all_togetharr/catalog/service.py`, `catalog/routes.py`, `catalog/models.py`, `backend/src/all_togetharr/migrations/versions/0007_title_metadata.py`, `main.py`
 - Acceptance:
-  - `GET /api/v1/search/metadata` returns TMDB results marked with whether each is in the library.
-  - `POST /api/v1/titles` stores the movie or series, with seasons and episodes.
-  - Adding the same title twice returns 409.
+  - `GET /api/v1/search/metadata` returns TMDB results marked with whether each is in the library. Requester and above.
+  - `POST /api/v1/titles` stores the movie or series, with seasons and episodes. Manager and above.
+  - Adding the same title twice returns 409, including when two adds race.
+  - `Title.overview`, `Title.poster_path` and `Episode.name` are stored, so Task 16 can show metadata without refetching.
+  - A TMDB failure returns a clear HTTP error with a `code`, and stores nothing.
 - Test: `uv run pytest tests/test_task13_add_title.py`
 
 ### [ ] Task 14: Catalog browse API

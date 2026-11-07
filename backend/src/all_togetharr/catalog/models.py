@@ -13,6 +13,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -52,6 +53,8 @@ class Title(Base):
     imdb_id: Mapped[str | None] = mapped_column(String(20), nullable=True)
     name: Mapped[str] = mapped_column(String(500), nullable=False)
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    overview: Mapped[str | None] = mapped_column(Text, nullable=True)
+    poster_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[TitleStatus] = mapped_column(
         Enum(TitleStatus, name="title_status", native_enum=False, create_constraint=True,
              values_callable=lambda e: [m.value for m in e], length=20),
@@ -151,6 +154,7 @@ class Episode(Base):
     title_id: Mapped[int] = mapped_column(Integer, nullable=False)
     season_number: Mapped[int] = mapped_column(Integer, nullable=False)
     episode_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[str | None] = mapped_column(String(500), nullable=True)
     absolute_no: Mapped[int | None] = mapped_column(Integer, nullable=True)
     air_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     monitored: Mapped[bool] = mapped_column(nullable=False, default=True)

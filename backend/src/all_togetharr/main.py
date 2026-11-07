@@ -10,6 +10,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from all_togetharr import __version__
+from all_togetharr.catalog.routes import router as catalog_router
+from all_togetharr.catalog.routes import tmdb_error_handler
+from all_togetharr.metadata.tmdb import TmdbError
 from all_togetharr.platform.auth.routes import router as auth_router
 from all_togetharr.platform.db import create_db_engine
 from all_togetharr.platform.jobs.runner import JobRunner
@@ -62,6 +65,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(settings_router)
+    app.include_router(catalog_router)
+
+    app.add_exception_handler(TmdbError, tmdb_error_handler)
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
