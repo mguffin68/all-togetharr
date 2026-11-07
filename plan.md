@@ -204,14 +204,15 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Listing 10,000 seeded titles returns in under 1 s.
 - Test: `uv run pytest tests/test_task14_browse.py`
 
-### [ ] Task 15: Frontend scaffold
+### [x] Task 15: Frontend scaffold
 
 - Files: `frontend/` (Vite, React, TypeScript, TanStack Query, Tailwind, Vitest)
 - Acceptance:
-  - `frontend/` has its own `package.json` and lockfile.
+  - `frontend/` has its own `package.json` and lockfile, and pins pnpm 10.34.6 in `packageManager` and `frontend/mise.toml`.
   - The dev server proxies `/api` to the backend.
   - A smoke test renders the app shell with dark and light themes.
-- Test: `cd frontend && pnpm test && pnpm build`
+  - The shell shows the API version from `/api/health`, or that the API is offline.
+- Test: `cd frontend && pnpm test && pnpm build`. If `pnpm` isn't set up, use `mise exec pnpm@10.34.6 -- pnpm test`.
 
 ### [ ] Task 16: Login and library pages
 
