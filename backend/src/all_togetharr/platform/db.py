@@ -1,13 +1,43 @@
 """Database engine, session factory, and ORM base."""
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import Request
-from sqlalchemy import MetaData, create_engine, event, make_url
+from sqlalchemy import DateTime, MetaData, TypeDecorator, create_engine, event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase
 
 from all_togetharr.platform.settings import Settings
+
+
+class UtcDateTime(TypeDecorator[datetime]):
+    """Store and return timezone-aware UTC datetimes.
+
+    SQLite drops tzinfo on read-back; this re-attaches UTC.
+    Naive values are rejected at write time.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(
+        self, value: datetime | None, dialect
+    ) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            raise ValueError("UtcDateTime requires a timezone-aware value")
+        return value.astimezone(UTC)
+
+    def process_result_value(
+        self, value: datetime | None, dialect
+    ) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
 
 
 class Base(DeclarativeBase):

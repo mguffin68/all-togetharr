@@ -1,8 +1,6 @@
-"""All model imports live here so Base.metadata is complete.
+"""All model imports live here so Base.metadata is complete."""
 
-No model tables exist yet.  Later tasks add their modules here.
-"""
-
+import all_togetharr.platform.jobs.models  # noqa: F401
 from all_togetharr.platform.db import Base
 
 __all__ = ["Base"]

@@ -75,13 +75,16 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - `/api/health` logs at DEBUG, because Docker polls it. Every other request logs at INFO.
 - Test: `uv run pytest tests/test_task05_logging.py`
 
-### [ ] Task 6: Persistent job table
+### [x] Task 6: Persistent job table
 
-- Files: `backend/src/all_togetharr/platform/jobs/models.py`, a new migration
+- Files: `backend/src/all_togetharr/platform/jobs/__init__.py`, `platform/jobs/models.py`, `platform/jobs/queue.py`, `platform/db.py`, `models.py`, a new migration
 - Acceptance:
-  - `Job` stores name, payload, status, attempts, max attempts, run-at time, last error.
-  - Enqueue and claim-next functions exist.
-  - One job cannot be claimed twice.
+  - `platform/db.py` adds a `UtcDateTime` column type: it rejects naive values, stores UTC and always returns timezone-aware UTC. All later models use it.
+  - `Job` (table `jobs`) stores name, payload, status, attempts, max attempts, run-at time, last error, and created, started and finished times.
+  - Status is one of `pending`, `running`, `succeeded`, `failed`, enforced by a database check.
+  - `enqueue` adds a job in the caller's transaction and validates its input.
+  - `claim_next` atomically takes the earliest due job, commits, and returns it, or returns `None`.
+  - One job cannot be claimed twice, even by concurrent workers.
 - Test: `uv run pytest tests/test_task06_job_table.py`
 
 ### [ ] Task 7: In-process job runner
