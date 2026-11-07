@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 
 from all_togetharr import __version__
 from all_togetharr.platform.db import create_db_engine
+from all_togetharr.platform.jobs.runner import JobRunner
 from all_togetharr.platform.logging import RequestLoggingMiddleware, configure_logging
 from all_togetharr.platform.migrations import run_migrations
 from all_togetharr.platform.settings import Settings
@@ -19,7 +20,11 @@ from all_togetharr.platform.settings import Settings
 async def lifespan(app: FastAPI):
     configure_logging(app.state.settings)
     run_migrations(app.state.engine)
+    runner = app.state.job_runner
+    runner.recover()
+    runner.start()
     yield
+    runner.stop()
     engine = app.state.engine
     engine.dispose()
 
@@ -44,6 +49,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine
     app.state.session_factory = session_factory
+    app.state.job_runner = JobRunner(session_factory)
 
     app.add_middleware(RequestLoggingMiddleware)
 

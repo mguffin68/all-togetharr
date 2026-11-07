@@ -87,14 +87,17 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - One job cannot be claimed twice, even by concurrent workers.
 - Test: `uv run pytest tests/test_task06_job_table.py`
 
-### [ ] Task 7: In-process job runner
+### [x] Task 7: In-process job runner
 
 - Files: `backend/src/all_togetharr/platform/jobs/runner.py`, `main.py`
 - Acceptance:
-  - The runner starts and stops with the app lifespan.
-  - Failed jobs retry with backoff until max attempts, then stay failed with the error stored.
-  - Jobs left `running` by a crash are requeued on startup.
-  - Recurring jobs can be registered with an interval.
+  - `JobRunner` runs jobs one at a time on a single background thread. It starts and stops with the app lifespan, and stopping waits for the running job.
+  - Handlers are registered by name and receive `(session, payload)`. Their database work commits with the job's success, and rolls back if they raise.
+  - Failed jobs retry with exponential backoff (30 s, doubling, capped at 1 hour) until max attempts, then stay failed with the error stored.
+  - A job with no handler fails at once, with no retry.
+  - Jobs left `running` by a crash are requeued on startup, or failed if they have no attempts left. A crash counts as an attempt, so a job that kills the app cannot loop forever.
+  - Recurring jobs are registered with `every(name, interval)`. The next run is worked out from the job table, so schedules survive restarts and a job is never queued twice.
+  - An unexpected error in the loop is logged and does not stop the runner.
 - Test: `uv run pytest tests/test_task07_job_runner.py`
 
 ### [ ] Task 8: Users and password hashing
