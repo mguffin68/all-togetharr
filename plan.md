@@ -225,7 +225,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - The app shell (name, theme toggle, API status) stays on every screen.
 - Test: `cd frontend && pnpm test && pnpm build`
 
-### [ ] Task 16b: Library page
+### [x] Task 16b: Library page
 
 - Files: `frontend/src/` (adds `react-router`)
 - Acceptance:

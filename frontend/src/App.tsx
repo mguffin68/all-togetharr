@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router";
 import { useHealth } from "./health";
 import { useTheme } from "./theme";
 import { fetchApi, ApiError } from "./api";
+import LibraryPage from "./library/LibraryPage";
 
 function extractMessage(err: unknown): string {
   if (err && typeof err === "object" && "message" in err) {
@@ -94,39 +96,43 @@ export default function App() {
   const btnLabel = theme === "light" ? "Switch to dark theme" : "Switch to light theme";
 
   return (
-    <div className="min-h-screen">
-      <header className="p-4">
-        <h1 className="text-2xl font-bold">All-Togetharr</h1>
-        {apiStatus && <p className="text-sm mt-1">{apiStatus}</p>}
-        {user && (
-          <p className="text-sm mt-1">Signed in as {user.name}</p>
-        )}
-        <div className="flex items-center gap-2 mt-2">
-          <button onClick={toggleTheme} className="px-3 py-1 rounded">
-            {btnLabel}
-          </button>
+    <BrowserRouter>
+      <div className="min-h-screen">
+        <header className="p-4">
+          <h1 className="text-2xl font-bold">All-Togetharr</h1>
+          {apiStatus && <p className="text-sm mt-1">{apiStatus}</p>}
           {user && (
-            <button
-              onClick={() => logoutMutation.mutate()}
-              className="px-3 py-1 rounded"
-            >
-              Sign out
-            </button>
+            <p className="text-sm mt-1">Signed in as {user.name}</p>
           )}
-        </div>
-      </header>
-      <main className="p-4">
-        {setupError || meError ? (
-          <p role="alert">{setupError?.message ?? meError?.message}</p>
-        ) : setupRequired ? (
-          <SetupForm setupMutation={setupMutation} />
-        ) : user ? (
-          <h2 className="text-xl font-semibold mt-4">Library</h2>
-        ) : (
-          <LoginForm loginMutation={loginMutation} />
-        )}
-      </main>
-    </div>
+          <div className="flex items-center gap-2 mt-2">
+            <button onClick={toggleTheme} className="px-3 py-1 rounded">
+              {btnLabel}
+            </button>
+            {user && (
+              <button
+                onClick={() => logoutMutation.mutate()}
+                className="px-3 py-1 rounded"
+              >
+                Sign out
+              </button>
+            )}
+          </div>
+        </header>
+        <main className="p-4">
+          {(setupQuery.isLoading || meQuery.isLoading) ? (
+            <div>Loading...</div>
+          ) : setupError || meError ? (
+            <p role="alert">{setupError?.message ?? meError?.message}</p>
+          ) : setupRequired ? (
+            <SetupForm setupMutation={setupMutation} />
+          ) : user ? (
+            <LibraryPage />
+          ) : (
+            <LoginForm loginMutation={loginMutation} />
+          )}
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
 

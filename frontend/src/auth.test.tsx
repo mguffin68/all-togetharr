@@ -273,6 +273,19 @@ describe("sign in", () => {
     expect(screen.queryByLabelText("Password")).toBeNull();
   });
 
+  it("doesn't flash the sign-in form while the session is being checked", async () => {
+    const { calls } = api({
+      "GET /api/v1/auth/setup": () => json({ required: false }),
+      "GET /api/v1/auth/me": () => new Promise<Response>(() => {}),
+    });
+
+    renderApp();
+    await waitFor(() => expect(calls.some((c) => c.path === "/api/v1/auth/me")).toBe(true));
+
+    expect(screen.queryByRole("heading", { name: "Sign in" })).toBeNull();
+    expect(screen.queryByLabelText("Password")).toBeNull();
+  });
+
   it("says when the server can't be reached instead of showing a form", async () => {
     api({
       "GET /api/v1/auth/setup": () => {
