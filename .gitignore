@@ -1,32 +1,19 @@
-# dependencies
-/node_modules
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
 
-# next.js
-/.next/
-/out/
+# Node (frontend/.gitignore also covers these)
+node_modules/
+dist/
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# env files
+# Local data and secrets
+*.db
+*.db-journal
 .env
-.env*.local
+.env.*
 
-# prisma local database
-/prisma/*.db
-/prisma/*.db-journal
-
-# typescript
-*.tsbuildinfo
-
-# playwright mcp logs
-/.playwright-mcp
+# OS and editor files
+.DS_Store

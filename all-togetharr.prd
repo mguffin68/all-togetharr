@@ -1,0 +1,255 @@
+# All-Togetharr — Product Specification
+
+Draft v0.1 · Nov 6, 2026 · @Mike
+
+## Overview
+
+All-Togetharr (working name) is a single self-hosted web app, shipped as one Docker image, that replaces the Sonarr, Radarr, Prowlarr, qBittorrent, Seerr and Jellyfin web UIs with one library, one queue and one request flow. It targets a single household server and keeps compatibility with the existing \*arr ecosystem so migration is incremental, not a rip-and-replace.
+
+### Problem
+
+- Six apps, six UIs, six auth systems, six databases that drift out of sync (a movie can be "available" in Jellyfin, "missing" in Radarr and "pending" in Seerr at once).
+- Config is duplicated: indexers, download client paths, quality rules and root folders live in several places.
+- Troubleshooting means hopping between logs to find where a grab, import or rename failed.
+
+### Goals
+
+1. One canonical media catalog (series, seasons, episodes, movies, files) that every feature reads and writes.
+2. Feature parity with the daily workflows of each replaced app (module list in Feature modules below).
+3. One request-to-playback pipeline with a single status per title: Requested → Approved → Searching → Downloading → Importing → Available.
+4. Runs as one container (plus optional sidecars) with sane defaults, configurable entirely from the UI.
+5. Import path from existing installs: read Sonarr/Radarr/Prowlarr/Seerr databases or APIs and qBittorrent state.
+
+### Non-goals (v1)
+
+- Writing a new video transcoder or streaming server. Playback, transcoding and client apps (TV, mobile) stay with Jellyfin; All-Togetharr integrates with it.
+- Usenet support (open question: keep the downloader abstraction ready for SABnzbd/NZBGet later).
+- Music, books, audiobooks (Lidarr/Readarr territory).
+- Multi-tenant or SaaS hosting; one instance serves one household.
+
+## Architecture and deployment
+
+All-Togetharr is a modular monolith: one backend process with internal modules sharing one database, one job queue and one event bus, plus a single-page web UI. Jellyfin stays a separate container that All-Togetharr drives through its API; the torrent engine is embedded by default with qBittorrent supported as an external client.
+
+### Stack (decided)
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Backend | Python 3.12, FastAPI, SQLAlchemy 2, Alembic | Async API, typed models, mature libtorrent bindings |
+| Jobs | In-process scheduler + persistent job table | No Redis needed; retries and history survive restarts |
+| Database | SQLite (WAL) default, PostgreSQL optional | Zero-config single container; Postgres for big libraries |
+| Torrent engine | libtorrent 2.x (embedded) or qBittorrent WebAPI | Native control of the queue without a second UI |
+| Frontend | React, TypeScript, Vite, TanStack Query, Tailwind | Fast SPA; live updates over WebSocket |
+| Realtime | WebSocket event stream | Queue progress, import results, notifications |
+| Metadata | TMDB (movies, series), TVDB optional, Trakt optional | TMDB is free and covers both media types |
+| Indexers | Torznab/Newznab + Cardigann-style YAML definitions | Reuses the public definition format Prowlarr uses |
+
+Alternative: Go backend for a smaller single binary and lower memory; trade-off is weaker libtorrent bindings (would use anacrolix/torrent instead).
+
+### Internal modules
+
+- **Catalog** — series, seasons, episodes, movies, collections, files; the single source of truth.
+- **Metadata** — TMDB/TVDB fetch, refresh, images cache, air-date calendar.
+- **Indexers** — definitions, search, RSS sync, caps, health, rate limits.
+- **Decision engine** — quality profiles, custom formats, scoring, release rejection reasons.
+- **Downloads** — torrent engine or external client adapter; queue, seeding rules, categories.
+- **Import** — completed-download handling, parsing, hardlink/move, rename, subtitles/extras.
+- **Requests** — Seerr-style discovery, requests, approvals, quotas.
+- **Media server** — Jellyfin adapter: library scans, availability sync, users, sessions, playback links.
+- **Platform** — auth, users, roles, settings, notifications, logs, backups, API keys.
+
+### Docker deployment
+
+- One image `all-togetharr:latest`, multi-arch (amd64, arm64), non-root with `PUID`/`PGID`/`UMASK` env vars.
+- Volumes: `/config` (DB, settings, logs, cache) and `/data` (one root holding `torrents/` and `media/` so imports hardlink instead of copy).
+- Ports: 8080 web/API, 6881 TCP/UDP torrent listen port.
+- Health check at `/api/health`; graceful shutdown pauses torrents and flushes resume data.
+- VPN: torrent traffic routed through a Gluetun sidecar (`network_mode: service:gluetun`) with a kill-switch check in All-Togetharr that pauses downloads if the public IP matches the home IP.
+- Optional GPU passthrough is Jellyfin's concern, not All-Togetharr's.
+
+```yaml
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    cap_add: [NET_ADMIN]
+    ports: ["8080:8080", "6881:6881", "6881:6881/udp"]
+    env_file: vpn.env
+  all-togetharr:
+    image: all-togetharr:latest
+    network_mode: service:gluetun
+    environment: [PUID=1000, PGID=1000, TZ=America/New_York]
+    volumes: ["./config:/config", "/srv/data:/data"]
+    depends_on: [gluetun]
+  jellyfin:
+    image: jellyfin/jellyfin
+    ports: ["8096:8096"]
+    volumes: ["./jellyfin:/config", "/srv/data/media:/data/media:ro"]
+```
+
+Routing only the torrent engine through the VPN (rather than the whole web UI) is an open question below.
+
+## Feature modules
+
+Every title follows one pipeline, and each module below owns a stage of it; P1 = must ship in v1, P2 = soon after, P3 = later.
+
+### Unified experience (new, not in any single app)
+
+- **Home dashboard**: continue watching (from Jellyfin), today's and this week's airings, active downloads, pending requests, recently added, disk space per root folder, health warnings. P1
+- **One title page**: metadata, files, quality, history, active download, request status, Jellyfin play button and watch state in one view. P1
+- **Global search** across library, TMDB, and indexers from one box (Cmd/Ctrl+K). P1
+- **Unified activity timeline** per title: requested by → grabbed from → downloaded → imported → scanned into Jellyfin → watched. P1
+- **Single status model** so the library, requests and Jellyfin never disagree. P1
+
+### Series (Sonarr parity)
+
+- Add series by TMDB/TVDB search; monitor options: all, future, missing, first/latest season, pilot, none. P1
+- Series types: standard, daily, anime (absolute numbering, scene mapping via XEM). P1 standard/daily, P2 anime
+- Season and episode monitoring toggles, season packs preference. P1
+- Calendar (agenda, week, month) with iCal feed. P1
+- Wanted: missing episodes and cutoff unmet, with bulk search. P1
+- Interactive (manual) search showing every release with score and rejection reasons. P1
+- Episode file management: rename preview, naming templates, folder format, delete/re-grab. P1
+- Series import from existing folders (library scan with match review). P1
+- Specials handling, alternate titles, language profiles. P2
+
+### Movies (Radarr parity)
+
+- Add by TMDB search, IMDb ID, or list; minimum availability (announced, in cinemas, released). P1
+- Collections (auto-add a franchise), editions (Director's Cut, IMAX) in naming. P2
+- Import lists: TMDB lists, Trakt lists/watchlists, IMDb lists, Plex/Jellyfin watchlist, with sync schedule. P2
+- Discover page with recommendations based on library. P2
+- Same wanted, manual search, rename and import tools as Series. P1
+
+### Quality and decision engine (shared Sonarr/Radarr)
+
+- Quality definitions with min/preferred/max size per minute. P1
+- Quality profiles with ordered tiers, upgrade-until cutoff. P1
+- Custom formats with regex conditions (release group, codec, source, HDR, language, size, indexer flags) and scores; minimum and cutoff scores. P1
+- Import/export custom formats in TRaSH-guide JSON so existing rules (e.g. preferred groups, x265/HEVC filters) carry over. P1
+- Release profiles: must contain, must not contain, delay profiles (wait N minutes for better release), blocklist. P1
+- Every grab decision stores its score breakdown for the activity timeline. P1
+
+### Indexers (Prowlarr parity)
+
+- Add public/private trackers from a definition catalog; Torznab/Newznab generic. P1
+- Per-indexer: categories, capabilities, priority, tags, seed requirements (min ratio, seed time), query/grab limits. P1
+- Built-in Cloudflare handling via optional FlareSolverr sidecar. P2
+- Indexer health, test, stats (queries, grabs, failures, response time). P1
+- RSS sync on interval plus on-demand search. P1
+- Manual search page across all indexers with filters and one-click send to download queue. P1
+- Expose a Torznab endpoint so external tools can still use All-Togetharr as an indexer proxy. P3
+
+### Downloads (qBittorrent parity)
+
+- Queue with add (magnet, .torrent, URL), pause, resume, force start, recheck, reannounce, priority up/down. P1
+- Per-torrent detail: trackers, peers, file list with per-file priority/skip, pieces, speed graph. P1
+- Categories and tags mapped to library type; save paths per category. P1
+- Global and per-torrent speed limits, alternative speed schedule. P1
+- Seeding rules: ratio, seed time, per-indexer requirements, then pause or remove (only after import completes). P1
+- Queue limits: max active downloads/uploads/torrents, slow-torrent exclusion. P1
+- Connection: listen port, UPnP/NAT-PMP, DHT/PeX/LSD toggles, encryption mode, IP filter list, bind to VPN interface. P1
+- Stalled/failed detection with automatic blocklist + re-search. P1
+- External client mode: qBittorrent (and later Transmission/Deluge) via API instead of the embedded engine. P1 qBittorrent
+
+### Import and file handling
+
+- Completed download handling: parse, match to title, verify quality, hardlink (fallback copy/move), rename. P1
+- Manual import screen for unmatched files with match suggestions. P1
+- Extras: subtitles (.srt/.ass), NFO, artwork; optional Bazarr-style subtitle search. P2
+- Recycle bin with retention instead of hard delete. P1
+- Media info probe (ffprobe): codec, resolution, HDR, audio tracks, languages. P1
+
+### Requests (Seerr parity)
+
+- Discover: trending, popular, upcoming, by genre/network/studio, search. P1
+- Request movie, whole series, or selected seasons; request in 4K as a separate profile. P1 basic, P2 4K
+- Approval workflow: auto-approve per user/role, manual approve with profile/folder override, decline with reason. P1
+- Quotas per user (N movies / N seasons per X days). P3 (household use; not needed early)
+- Issue reporting on a title (bad audio, wrong file, subs missing) routed to admins. P2
+- Request status visible to requester through to Available, with notification. P1
+
+### Jellyfin integration
+
+- Connect by URL + API key; map All-Togetharr root folders to Jellyfin libraries. P1
+- Trigger targeted library refresh on import (path-level, not full scan). P1
+- Availability and watch-state sync back into All-Togetharr. P1
+- Play button: deep link to Jellyfin web, or embedded player using Jellyfin streaming endpoints. P1 deep link, P2 embedded
+- User management: create Jellyfin users from All-Togetharr, single sign-on via Jellyfin login. P1 login, P2 provisioning
+- Active sessions view: who is watching what, transcode vs direct play, stop session, send message. P2
+- Library admin: metadata refresh, identify, image edit for a title. P3 (Jellyfin UI stays the tool for this)
+
+## Platform
+
+One database, one API and one permission model serve every module; the UI uses only the public API, so anything the UI does can be scripted.
+
+### Core data model
+
+| Entity | Key fields | Notes |
+| --- | --- | --- |
+| Title | id, type (movie/series), tmdb\_id, tvdb\_id, imdb\_id, status, monitored, quality\_profile\_id, root\_folder\_id, tags | One row per movie or series |
+| Season / Episode | title\_id, season, episode, absolute\_no, air\_date, monitored, file\_id | Series only |
+| MediaFile | path, size, quality, custom\_format\_score, mediainfo (json), jellyfin\_item\_id | Hardlink-aware |
+| Release | indexer\_id, guid, title, size, seeders, parsed quality, score, rejections | Cached search results |
+| Download | hash, client, category, state, progress, ratio, seed\_until, linked title/episodes | Embedded or external |
+| Request | user\_id, title\_id, seasons, profile, status, approved\_by, reason | Seerr model |
+| Indexer | definition, settings (encrypted), priority, caps, health | Prowlarr model |
+| HistoryEvent | title\_id, type (requested, grabbed, imported, renamed, deleted, watched), payload | Feeds the activity timeline |
+| User | name, role, auth source (local/Jellyfin/OIDC), quotas, notification prefs |  |
+
+### API
+
+- REST under `/api/v1`, OpenAPI spec generated and browsable at `/api/docs`. P1
+- WebSocket `/api/v1/events` for queue progress, job status, notifications. P1
+- API keys per user with scopes (read, request, manage). P1
+- Compatibility shims: a subset of Sonarr/Radarr v3 endpoints so tools like Overseerr-era bots, LunaSea-type mobile apps, and dashboards keep working. P3
+- Outbound webhooks on every HistoryEvent type. P1
+
+### Users and permissions
+
+- Roles: Admin (everything), Manager (library + downloads, no settings), Requester (discover + request + own requests), Viewer (browse only). P1
+- Auth: local accounts with Argon2 hashes, "Sign in with Jellyfin", optional OIDC (Authelia, Authentik). P1 local + Jellyfin, P2 OIDC
+- Optional 2FA (TOTP) for admin accounts. P2
+
+### Notifications
+
+- Channels: email (SMTP), Discord, Telegram, Pushover, ntfy, Gotify, generic webhook. P1 Discord/ntfy/webhook, P2 rest
+- Events selectable per channel and per user: request approved, available, grab, import, failure, health issue, disk low. P1
+
+### Operations
+
+- Scheduled tasks page: RSS sync, refresh metadata, refresh monitored downloads, disk scan, backup, housekeeping; each with last/next run and Run now. P1
+- Logs viewer with level filter and download; structured JSON logs to stdout for Docker. P1
+- System health checks: indexers down, client unreachable, root folder missing or not writable, hardlinks not possible (different filesystems), VPN leak, disk under threshold. P1
+- Automatic daily backups of `/config` DB and settings, keep N, restore from UI. P1
+- Migration wizard: import from Sonarr, Radarr, Prowlarr, Jellyseerr/Overseerr and qBittorrent via their APIs. P1 Sonarr/Radarr/qBittorrent, P2 others
+
+### Non-functional requirements
+
+- Library scale: 3,000 series / 60,000 episodes / 10,000 movies without UI pages over 1 s.
+- Idle footprint target: under 300 MB RAM, under 2% CPU (excluding active torrents).
+- Mobile-responsive UI; installable PWA; dark and light themes.
+- All secrets (indexer passwords, API keys) encrypted at rest in the DB.
+- No telemetry; all outbound calls listed in settings (metadata, indexers, notifications, update check).
+- Accessibility: keyboard navigable, WCAG 2.1 AA contrast.
+
+## Roadmap
+
+Each phase is usable on its own, so All-Togetharr can run beside the existing stack and take over one app at a time.
+
+1. **Phase 0 — Foundation**: container, auth, settings, DB, job runner, logs, health, TMDB metadata, catalog browse.
+2. **Phase 1 — Movies end-to-end**: indexers, decision engine, external qBittorrent client, import/rename, Jellyfin refresh. Replaces Radarr + Prowlarr.
+3. **Phase 2 — Series**: episodes, calendar, season packs, daily series. Replaces Sonarr.
+4. **Phase 3 — Requests**: discover, requests, approvals, Jellyfin sign-in, notifications. Replaces Seerr.
+5. **Phase 4 — Embedded torrent engine**: full queue UI, seeding rules, VPN guard. Becomes the default; qBittorrent stays a supported external client.
+6. **Phase 5 — Polish**: anime, 4K profiles, import lists, sessions view, embedded player, API compatibility shims.
+
+## Open questions
+
+**Decided (2026-11-06):** native rebuild, phase by phase; torrents support both embedded libtorrent (default) and qBittorrent; household use (a few accounts, simple approvals); Python/FastAPI + React.
+
+- [ ] Jellyfin depth: deep-link to Jellyfin for playback, or an embedded browser player in All-Togetharr?
+- [ ] VPN: route only torrent traffic through Gluetun, or the whole All-Togetharr container?
+- [ ] Usenet: out of scope, or keep a SABnzbd adapter on the roadmap?
+- [ ] Anime and 4K: needed in v1 or later?
+- [ ] Migration: which existing settings must carry over on day one (custom formats, indexers, request history, torrent seeding state)?
+- [ ] Name: working title is now "All-Togetharr" (replaced "Helm", which collided with the Kubernetes package manager).
