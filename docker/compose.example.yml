@@ -1,0 +1,15 @@
+services:
+  all-togetharr:
+    image: all-togetharr:latest
+    ports:
+      - "8080:8080"
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      UMASK: "022"
+      TZ: "Etc/UTC"
+    volumes:
+      - ./config:/config
+      - /srv/data:/data
+    restart: unless-stopped
+    # /data holds torrents/ and media/ on one filesystem so imports can hardlink

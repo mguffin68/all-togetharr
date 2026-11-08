@@ -252,7 +252,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - No file outside `STATIC_DIR` can be served.
 - Test: `cd backend && uv run pytest && uv run ruff check`
 
-### [ ] Task 17b: Docker image
+### [x] Task 17b: Docker image
 
 - Files: `docker/Dockerfile`, `docker/entrypoint.sh`, `docker/compose.example.yml`, `.dockerignore`, test script `docker/test_image.sh`
 - Acceptance:
