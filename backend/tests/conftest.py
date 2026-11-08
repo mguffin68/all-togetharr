@@ -6,7 +6,9 @@ from fastapi.testclient import TestClient
 from all_togetharr.main import create_app
 from all_togetharr.platform.settings import Settings
 
-SETTINGS_ENV_VARS = ("CONFIG_DIR", "DATA_DIR", "DATABASE_URL", "LOG_LEVEL", "TZ", "COOKIE_SECURE")
+SETTINGS_ENV_VARS = (
+    "CONFIG_DIR", "DATA_DIR", "DATABASE_URL", "LOG_LEVEL", "TZ", "COOKIE_SECURE", "STATIC_DIR",
+)
 
 
 @pytest.fixture(autouse=True)

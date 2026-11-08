@@ -234,7 +234,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Works at phone width (one column, no horizontal scroll).
 - Test: `cd frontend && pnpm test && pnpm build`
 
-### [ ] Task 16c: Title page
+### [x] Task 16c: Title page
 
 - Files: `frontend/src/`
 - Acceptance:
@@ -242,16 +242,27 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Shows a not-found message for an unknown title.
 - Test: `cd frontend && pnpm test && pnpm build`
 
-### [ ] Task 17: Docker image
+### [x] Task 17a: Serve the built SPA from the API
 
-- Files: `docker/Dockerfile`, `docker/entrypoint.sh`, `docker/compose.example.yml`
+- Files: `backend/src/all_togetharr/platform/settings.py`, `backend/src/all_togetharr/main.py` (or a small `platform/spa.py`), tests `backend/tests/test_task17_static.py`
+- Acceptance:
+  - New setting `STATIC_DIR` (off by default). When set, `/` and client routes such as `/titles/7` return `index.html` with `Cache-Control: no-cache`, and built files such as `/assets/*.js` are served.
+  - Missing files (any path whose last segment has a dot) are 404, not `index.html`.
+  - `/api` paths never fall back to `index.html`; unknown ones stay JSON 404s.
+  - No file outside `STATIC_DIR` can be served.
+- Test: `cd backend && uv run pytest && uv run ruff check`
+
+### [ ] Task 17b: Docker image
+
+- Files: `docker/Dockerfile`, `docker/entrypoint.sh`, `docker/compose.example.yml`, `.dockerignore`, test script `docker/test_image.sh`
 - Acceptance:
   - One image serves the API and the built SPA on port 8080.
   - It runs as non-root using `PUID`, `PGID` and `UMASK`, with volumes `/config` and `/data`.
   - The container health check calls `/api/health`.
-  - Uvicorn starts with `log_config=None`, so its first lines before app startup are JSON too. Add an integration check: every line of container output parses as JSON.
+  - Uvicorn starts with `log_config=None`, so its first lines before app startup are JSON too. Every line of container output parses as JSON.
+  - It stops cleanly on `docker stop`.
   - Builds for amd64 and arm64.
-- Test: `docker build -f docker/Dockerfile -t all-togetharr:dev . && docker run --rm -p 8080:8080 all-togetharr:dev`, then `curl localhost:8080/api/health`
+- Test: `docker/test_image.sh` (add `--multiarch` for the arm64 build)
 
 ### [ ] Task L1: Finish removing the old Next.js app (needs Mike's OK)
 

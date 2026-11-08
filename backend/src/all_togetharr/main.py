@@ -21,6 +21,7 @@ from all_togetharr.platform.migrations import run_migrations
 from all_togetharr.platform.secrets import SecretBox, load_or_create_key
 from all_togetharr.platform.settings import Settings
 from all_togetharr.platform.settings_routes import router as settings_router
+from all_togetharr.platform.spa import mount_spa
 
 
 @asynccontextmanager
@@ -97,5 +98,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 status_code=503,
                 content={"status": "error", "version": __version__},
             )
+
+    if settings.static_dir is not None:
+        mount_spa(app, settings.static_dir)
 
     return app
