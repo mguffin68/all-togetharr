@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router";
 import { useHealth } from "./health";
 import { useTheme } from "./theme";
 import { fetchApi, ApiError } from "./api";
 import LibraryPage from "./library/LibraryPage";
+import TitlePage from "./titles/TitlePage";
 
 function extractMessage(err: unknown): string {
   if (err && typeof err === "object" && "message" in err) {
@@ -126,7 +127,11 @@ export default function App() {
           ) : setupRequired ? (
             <SetupForm setupMutation={setupMutation} />
           ) : user ? (
-            <LibraryPage />
+            <Routes>
+              <Route path="/" element={<LibraryPage />} />
+              <Route path="/titles/:id" element={<TitlePage />} />
+              <Route path="*" element={<p>Page not found.</p>} />
+            </Routes>
           ) : (
             <LoginForm loginMutation={loginMutation} />
           )}
