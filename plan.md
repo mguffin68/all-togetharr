@@ -264,7 +264,7 @@ Status key: `[ ]` not started, `[~]` tests written, `[x]` done.
   - Builds for amd64 and arm64.
 - Test: `docker/test_image.sh` (add `--multiarch` for the arm64 build)
 
-### [ ] Task L1: Finish removing the old Next.js app (needs Mike's OK)
+### [x] Task L1: Finish removing the old Next.js app (needs Mike's OK)
 
 - Files:
   - Commit the deletions already on disk (`src/`, `prisma/`, `package.json`, `Dockerfile`, and so on).
